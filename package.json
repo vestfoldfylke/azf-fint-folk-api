@@ -1,6 +1,6 @@
 {
   "name": "azf-fint-folk-api",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "API for getting smoother data from FINT (easier usage)",
   "scripts": {
     "start": "func start",
