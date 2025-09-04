@@ -142,7 +142,6 @@ describe('repackPeriode works as expected', () => {
     })
   })
   test('No periode... should be null', () => {
-    const tenMinutesAgo = new Date(today.getTime() - 10 * 60 * 1000).toISOString()
     const periode = null
     const repacked = repackPeriode(periode)
     expect(repacked).toBeNull()
