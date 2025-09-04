@@ -141,10 +141,17 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('No periode... should be null', () => {
+  test('No periode... should be aktiv and null values', () => {
     const periode = null
     const repacked = repackPeriode(periode)
-    expect(repacked).toBeNull()
+    expect(repacked).toEqual({
+      beskrivelse: null,
+      start: null,
+      slutt: null,
+      fintStart: null,
+      fintSlutt: null,
+      aktiv: true
+    })
   })
   test('Slutt is null, start is in the past - should be aktiv', () => {
     const periode = {
