@@ -1,4 +1,4 @@
-const { aktivPeriode, repackLeder, createStruktur } = require('../../lib/helpers/repack-fint')
+const { aktivPeriode, repackPeriode, repackLeder, createStruktur } = require('../../lib/helpers/repack-fint')
 
 describe('aktivPeriode is aktiv when', () => {
   test('Sluttdato is null', () => {
@@ -68,6 +68,115 @@ describe('aktivPeriode is NOT aktiv when', () => {
     }
     const aktiv = aktivPeriode(periode)
     expect(aktiv).toBe(false)
+  })
+})
+
+describe('repackPeriode works as expected', () => {
+  const today = new Date()
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  test('Regular FINT periode has values and is aktiv', () => {
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T12:00:00.000Z',
+      slutt: '2051-08-31T12:00:00.000Z'
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T00:00:00.000Z',
+      slutt: '2051-08-31T23:59:59.999Z',
+      fintStart: '2019-08-01T12:00:00.000Z',
+      fintSlutt: '2051-08-31T12:00:00.000Z',
+      aktiv: true
+    })
+  })
+  test('Regular FINT periode has values and is not aktiv', () => {
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T12:00:00.000Z',
+      slutt: '2019-08-31T12:00:00.000Z'
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T00:00:00.000Z',
+      slutt: '2019-08-31T23:59:59.999Z',
+      fintStart: '2019-08-01T12:00:00.000Z',
+      fintSlutt: '2019-08-31T12:00:00.000Z',
+      aktiv: false
+    })
+  })
+  test('Regular FINT periode has values and has funny case where start is today but timstamp not reached yet - should be aktiv', () => {
+    const inTenMinutes = new Date(today.getTime() + 10 * 60 * 1000).toISOString()
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: inTenMinutes,
+      slutt: '2051-08-31T12:00:00.000Z'
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: `${inTenMinutes.substring(0, 11)}00:00:00.000Z`,
+      slutt: '2051-08-31T23:59:59.999Z',
+      fintStart: inTenMinutes,
+      fintSlutt: '2051-08-31T12:00:00.000Z',
+      aktiv: true
+    })
+  })
+  test('Regular FINT periode has values and has funny case where end is today and timstamp is reached - should be aktiv', () => {
+    const tenMinutesAgo = new Date(today.getTime() - 10 * 60 * 1000).toISOString()
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: '2021-08-31T12:00:00.000Z',
+      slutt: tenMinutesAgo
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: '2021-08-31T00:00:00.000Z',
+      slutt: `${tenMinutesAgo.substring(0, 11)}23:59:59.999Z`,
+      fintStart: '2021-08-31T12:00:00.000Z',
+      fintSlutt: tenMinutesAgo,
+      aktiv: true
+    })
+  })
+  test('No periode... should be null', () => {
+    const periode = null
+    const repacked = repackPeriode(periode)
+    expect(repacked).toBeNull()
+  })
+  test('Slutt is null, start is in the past - should be aktiv', () => {
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T12:00:00.000Z',
+      slutt: null
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: '2019-08-01T00:00:00.000Z',
+      slutt: null,
+      fintStart: '2019-08-01T12:00:00.000Z',
+      fintSlutt: null,
+      aktiv: true
+    })
+  })
+  test('Start is null, should not be aktiv', () => {
+    const periode = {
+      beskrivelse: 'Test periode',
+      start: null,
+      slutt: 'Promp'
+    }
+    const repacked = repackPeriode(periode)
+    expect(repacked).toEqual({
+      beskrivelse: 'Test periode',
+      start: null,
+      slutt: null,
+      fintStart: null,
+      fintSlutt: 'Promp',
+      aktiv: false
+    })
   })
 })
 
