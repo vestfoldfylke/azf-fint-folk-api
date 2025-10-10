@@ -10,14 +10,14 @@
   "dependencies": {
     "@azure/msal-node": "^1.18.4",
     "@vtfk/logger": "^6.3.4",
-    "axios": "^1.11.0",
-    "file-system-cache": "^2.4.4",
-    "jsonwebtoken": "^9.0.0"
+    "axios": "^1.12.2",
+    "file-system-cache": "^2.4.7",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.2",
-    "jest": "^29.5.0",
-    "standard": "^17.1.0"
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "standard": "^17.1.2"
   },
   "standard": {
     "ignore": [
