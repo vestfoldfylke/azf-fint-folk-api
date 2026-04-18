@@ -4,27 +4,13 @@
   "description": "API for getting smoother data from FINT (easier usage)",
   "scripts": {
     "start": "func start",
-    "test": "standard && jest",
-    "test-jest": "jest --verbose"
+    "test": "node --test tests/**/*.test.js"
   },
   "dependencies": {
-    "@azure/msal-node": "^1.18.4",
-    "@vtfk/logger": "^6.3.4",
-    "axios": "^1.12.2",
+    "@azure/msal-node": "^5.1.1",
+    "@vtfk/logger": "^6.4.2",
+    "axios": "^1.13.6",
     "file-system-cache": "^2.4.7",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
-    "standard": "^17.1.2"
-  },
-  "standard": {
-    "ignore": [
-      "/fint-templates"
-    ],
-    "env": [
-      "jest"
-    ]
+    "jsonwebtoken": "^9.0.3"
   }
 }

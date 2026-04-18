@@ -1,3 +1,5 @@
+const { describe, it } = require('node:test')
+const assert = require('node:assert/strict')
 const { organizationFixed, fint: { url } } = require('../../config')
 const { getExceptionRules } = require('../../lib/fint-organization-fixed/exception-rules')
 const { repackFintIdmEnheter, vgsNameChain } = require('../../lib/fint-organization-fixed/idm')
@@ -227,85 +229,83 @@ organizationFixed.idmMinimumUnits = 0
 organizationFixed.idmMaximumUnits = 1000
 
 describe('vgsNameChain', () => {
-  test('Returns true when all names in namechain startswith same schoolName and ends with vgs, videregående skole, or vidaregående skule', () => {
+  it('Returns true when all names in namechain startswith same schoolName and ends with vgs, videregående skole, or vidaregående skule', () => {
     const nameChain = ['Tull vgs', 'Tull videregående skole', 'Tull videregåande skule']
-    expect(vgsNameChain(nameChain)).toBe(true)
+    assert.strictEqual(vgsNameChain(nameChain), true)
   })
-  test('Returns false when not all starts with same school name', () => {
+  it('Returns false when not all starts with same school name', () => {
     const nameChain = ['Felles VGS', 'Tull videregående skole', 'Tull videregående skole']
     const nameChain2 = ['Felles VGS', 'Tull videregående skole', 'felles vgs']
     const nameChain3 = ['Felles VGS', 'Felles VGS', 'tull vgs']
-    expect(vgsNameChain(nameChain)).toBe(false)
-    expect(vgsNameChain(nameChain2)).toBe(false)
-    expect(vgsNameChain(nameChain3)).toBe(false)
+    assert.strictEqual(vgsNameChain(nameChain), false)
+    assert.strictEqual(vgsNameChain(nameChain2), false)
+    assert.strictEqual(vgsNameChain(nameChain3), false)
   })
-  test('Returns false when not all ends with correct suffx', () => {
+  it('Returns false when not all ends with correct suffx', () => {
     const nameChain = ['Tull vgs', 'Tull videregående skole', 'Tull']
     const nameChain2 = ['Tull vgs', 'Tull videregående skoler']
     const nameChain3 = ['Tull vgs', 'Tullball skole', 'Tull vidaregående skule']
-    expect(vgsNameChain(nameChain)).toBe(false)
-    expect(vgsNameChain(nameChain2)).toBe(false)
-    expect(vgsNameChain(nameChain3)).toBe(false)
+    assert.strictEqual(vgsNameChain(nameChain), false)
+    assert.strictEqual(vgsNameChain(nameChain2), false)
+    assert.strictEqual(vgsNameChain(nameChain3), false)
   })
-  test('Returns true when there are only uppercase differences', () => {
+  it('Returns true when there are only uppercase differences', () => {
     const nameChain = ['TULL VGS', 'tULL VIdEREGÅENDE SKOLE', 'TULL VIDEReGÅANDE SKULE']
     const nameChain2 = ['tull videregående skole', 'Tull vgs', 'tULL VIDEREGÅaNDE SKuLE']
-    expect(vgsNameChain(nameChain)).toBe(true)
-    expect(vgsNameChain(nameChain2)).toBe(true)
+    assert.strictEqual(vgsNameChain(nameChain), true)
+    assert.strictEqual(vgsNameChain(nameChain2), true)
   })
 })
 
 describe('createTestOrg', () => {
-  test('Works', () => {
+  it('Works', () => {
     const { units, aditroUnits } = createTestOrg()
-    expect(units).toBeDefined()
-    expect(units.length).toBeGreaterThan(0)
-    expect(aditroUnits).toBeDefined()
-    expect(aditroUnits.size).toBeGreaterThan(0)
+    assert.ok(units !== undefined)
+    assert.ok(units.length > 0)
+    assert.ok(aditroUnits !== undefined)
+    assert.ok(aditroUnits.size > 0)
   })
-  test('Is valid raw organizations', () => {
+  it('Is valid raw organizations', () => {
     const { units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    expect(validationResult.valid).toBe(true)
+    assert.strictEqual(validationResult.valid, true)
   })
 })
 
 describe('repackFintIdmEnheter works as expected when', () => {
-  test('throws when arguments are missing', () => {
+  it('throws when arguments are missing', () => {
     const units = []
-    const shouldThrow = () => repackFintIdmEnheter(units)
-    const shouldAlsoThrow = () => repackFintIdmEnheter([], [], undefined)
-    expect(shouldThrow).toThrow()
-    expect(shouldAlsoThrow).toThrow()
+    assert.throws(() => repackFintIdmEnheter(units))
+    assert.throws(() => repackFintIdmEnheter([], [], undefined))
   })
-  test('test org is repacked, but has validation errors when no exceptions are defined', () => {
+  it('test org is repacked, but has validation errors when no exceptions are defined', () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
     const repackResult = repackFintIdmEnheter(validationResult.tests.topUnits.data, validationResult.validUnits, aditroUnits, getExceptionRules())
     const expectedTopUnits = ['test-fylkeskommune-1']
     const topUnitsPresent = expectedTopUnits.every(topUnit => validationResult.tests.topUnits.data.some(unit => unit.organisasjonsId.identifikatorverdi === topUnit))
-    expect(validationResult.tests.topUnits.data.length).toBe(expectedTopUnits.length)
-    expect(topUnitsPresent).toBe(true)
+    assert.strictEqual(validationResult.tests.topUnits.data.length, expectedTopUnits.length)
+    assert.strictEqual(topUnitsPresent, true)
 
     const expectedNoBottomUnits = ['test-fylkeskommune-1']
     const correspondingBottomUnitMissing = expectedNoBottomUnits.every(expectedNoBottomUnit => repackResult.tests.correspondingBottomUnitMissing.data.some(unit => unit.organisasjonsId.identifikatorverdi === expectedNoBottomUnit))
-    expect(repackResult.tests.correspondingBottomUnitMissing.data.length).toBe(expectedNoBottomUnits.length)
-    expect(correspondingBottomUnitMissing).toBe(true)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitMissing.data.length, expectedNoBottomUnits.length)
+    assert.strictEqual(correspondingBottomUnitMissing, true)
 
     const expectedDifferentNameChain = ['test-opplaring-11', 'test-fellesvgs-111', 'annen-drit-112']
     const differentNameChain = expectedDifferentNameChain.every(expectedDifferentNameChainUnit => repackResult.tests.correspondingBottomUnitDifferentName.data.some(unit => unit.organisasjonsId.identifikatorverdi === expectedDifferentNameChainUnit))
-    expect(repackResult.tests.correspondingBottomUnitDifferentName.data.length).toBe(expectedDifferentNameChain.length)
-    expect(differentNameChain).toBe(true)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitDifferentName.data.length, expectedDifferentNameChain.length)
+    assert.strictEqual(differentNameChain, true)
 
-    expect(repackResult.valid).toBe(false)
+    assert.strictEqual(repackResult.valid, false)
   })
 })
 
 describe('repackFintIdmEnheter works as expected when', () => {
-  test('We add exception rule for overrideNextProbableLink', () => {
+  it('We add exception rule for overrideNextProbableLink', () => {
     const { aditroUnits, units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    const exceptionRules = getExceptionRules() // Gets empty rules
+    const exceptionRules = getExceptionRules()
     exceptionRules.overrideNextProbableLink = {
       'test-fellesvgs-111': {
         navn: 'Felles VGS',
@@ -319,18 +319,18 @@ describe('repackFintIdmEnheter works as expected when', () => {
 
     const expectedDifferentNameChain = ['test-opplaring-11', 'annen-drit-112']
     const differentNameChain = expectedDifferentNameChain.every(expectedDifferentNameChainUnit => repackResult.tests.correspondingBottomUnitDifferentName.data.some(unit => unit.organisasjonsId.identifikatorverdi === expectedDifferentNameChainUnit))
-    expect(repackResult.tests.correspondingBottomUnitDifferentName.data.length).toBe(expectedDifferentNameChain.length)
-    expect(differentNameChain).toBe(true)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitDifferentName.data.length, expectedDifferentNameChain.length)
+    assert.strictEqual(differentNameChain, true)
 
     const ruleWasUsed = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'overrideNextProbableLink' && usedRule.data.organisasjonsId === 'test-fellesvgs-111')
-    expect(ruleWasUsed).toBe(true)
+    assert.strictEqual(ruleWasUsed, true)
 
-    expect(repackResult.valid).toBe(false)
+    assert.strictEqual(repackResult.valid, false)
   })
-  test('We add exception rule for useAbstractAsUnit', () => {
+  it('We add exception rule for useAbstractAsUnit', () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    const exceptionRules = getExceptionRules() // Gets empty rules
+    const exceptionRules = getExceptionRules()
     exceptionRules.useAbstractAsUnitOverride = {
       'test-fylkeskommune-1': {
         navn: 'Test Fylkeskommune'
@@ -340,18 +340,18 @@ describe('repackFintIdmEnheter works as expected when', () => {
 
     const expectedNoBottomUnits = []
     const correspondingBottomUnitMissing = expectedNoBottomUnits.every(expectedNoBottomUnit => repackResult.tests.correspondingBottomUnitMissing.data.some(unit => unit.organisasjonsId.identifikatorverdi === expectedNoBottomUnit))
-    expect(repackResult.tests.correspondingBottomUnitMissing.data.length).toBe(expectedNoBottomUnits.length)
-    expect(correspondingBottomUnitMissing).toBe(true)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitMissing.data.length, expectedNoBottomUnits.length)
+    assert.strictEqual(correspondingBottomUnitMissing, true)
 
     const ruleWasUsed = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'useAbstractAsUnitOverride' && usedRule.data.organisasjonsId === 'test-fylkeskommune-1')
-    expect(ruleWasUsed).toBe(true)
+    assert.strictEqual(ruleWasUsed, true)
 
-    expect(repackResult.valid).toBe(false)
+    assert.strictEqual(repackResult.valid, false)
   })
-  test('We add exception rule for nameChainOverride', () => {
+  it('We add exception rule for nameChainOverride', () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    const exceptionRules = getExceptionRules() // Gets empty rules
+    const exceptionRules = getExceptionRules()
     exceptionRules.nameChainOverride = {
       'test-opplaring-11': {
         navn: 'Opplæring',
@@ -362,58 +362,55 @@ describe('repackFintIdmEnheter works as expected when', () => {
 
     const expectedDifferentNameChain = ['test-fellesvgs-111', 'annen-drit-112']
     const differentNameChain = expectedDifferentNameChain.every(expectedDifferentNameChainUnit => repackResult.tests.correspondingBottomUnitDifferentName.data.some(unit => unit.organisasjonsId.identifikatorverdi === expectedDifferentNameChainUnit))
-    expect(repackResult.tests.correspondingBottomUnitDifferentName.data.length).toBe(expectedDifferentNameChain.length)
-    expect(differentNameChain).toBe(true)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitDifferentName.data.length, expectedDifferentNameChain.length)
+    assert.strictEqual(differentNameChain, true)
 
     const ruleWasUsed = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'nameChainOverride' && usedRule.data.organisasjonsId === 'test-opplaring-11')
-    expect(ruleWasUsed).toBe(true)
+    assert.strictEqual(ruleWasUsed, true)
 
-    expect(repackResult.valid).toBe(false)
+    assert.strictEqual(repackResult.valid, false)
   })
-  test('We add needed exception rules and get valid result', () => {
+  it('We add needed exception rules and get valid result', () => {
     const { aditroUnits, units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    const exceptionRules = getValidExcepttionRules() // Gets valid rules
+    const exceptionRules = getValidExcepttionRules()
 
     const repackResult = repackFintIdmEnheter(validationResult.tests.topUnits.data, validationResult.validUnits, aditroUnits, exceptionRules)
 
-    expect(repackResult.tests.correspondingBottomUnitMissing.data.length).toBe(0)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitMissing.data.length, 0)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitDifferentName.data.length, 0)
+    assert.ok(repackResult.tests.missingLeader.data.length > 0)
 
-    expect(repackResult.tests.correspondingBottomUnitDifferentName.data.length).toBe(0)
-
-    expect(repackResult.tests.missingLeader.data.length).toBeGreaterThan(0)
-
-    expect(repackResult.handledByExceptionRules.length).toBe(4)
+    assert.strictEqual(repackResult.handledByExceptionRules.length, 4)
     const overrideNextProbableLinkRule = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'overrideNextProbableLink' && usedRule.data.organisasjonsId === 'test-fellesvgs-111')
     const useAbstractAsUnitRule1 = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'useAbstractAsUnitOverride' && usedRule.data.organisasjonsId === 'test-fylkeskommune-1')
     const useAbstractAsUnitRule2 = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'useAbstractAsUnitOverride' && usedRule.data.organisasjonsId === 'annen-drit-112')
     const nameChainOverrideRule = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'nameChainOverride' && usedRule.data.organisasjonsId === 'test-opplaring-11')
 
-    expect(overrideNextProbableLinkRule).toBe(true)
-    expect(useAbstractAsUnitRule1).toBe(true)
-    expect(useAbstractAsUnitRule2).toBe(true)
-    expect(nameChainOverrideRule).toBe(true)
+    assert.strictEqual(overrideNextProbableLinkRule, true)
+    assert.strictEqual(useAbstractAsUnitRule1, true)
+    assert.strictEqual(useAbstractAsUnitRule2, true)
+    assert.strictEqual(nameChainOverrideRule, true)
 
-    expect(repackResult.resultingUnitsFlat.length).toBeGreaterThan(0)
+    assert.ok(repackResult.resultingUnitsFlat.length > 0)
 
-    // Sjekker også om reglene har gjort det de skal...
     const overrideNextLinkResult = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-fellesvgs-111')
-    expect(overrideNextLinkResult.organisasjonsId.identifikatorverdi).toBe('test-fellesvgs-11110')
+    assert.strictEqual(overrideNextLinkResult.organisasjonsId.identifikatorverdi, 'test-fellesvgs-11110')
 
     const abstractUnitResult1 = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-fylkeskommune-1')
-    expect(abstractUnitResult1.organisasjonsId.identifikatorverdi).toBe('test-fylkeskommune-1')
+    assert.strictEqual(abstractUnitResult1.organisasjonsId.identifikatorverdi, 'test-fylkeskommune-1')
     const abstractUnitResult2 = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'annen-drit-112')
-    expect(abstractUnitResult2.organisasjonsId.identifikatorverdi).toBe('annen-drit-112')
+    assert.strictEqual(abstractUnitResult2.organisasjonsId.identifikatorverdi, 'annen-drit-112')
 
     const nameChainOverrideResult = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-opplaring-11')
-    expect(nameChainOverrideResult.organisasjonsId.identifikatorverdi).toBe('test-opplaring-1100')
+    assert.strictEqual(nameChainOverrideResult.organisasjonsId.identifikatorverdi, 'test-opplaring-1100')
 
-    expect(repackResult.valid).toBe(true)
+    assert.strictEqual(repackResult.valid, true)
   })
-  test('We add extra exception rules and get valid result', () => {
+  it('We add extra exception rules and get valid result', () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
-    const exceptionRules = getValidExcepttionRules() // Gets valid rules
+    const exceptionRules = getValidExcepttionRules()
     exceptionRules.absorbChildrenOverrides = {
       'test-opplaring-11': {
         navn: 'Opplæring',
@@ -439,11 +436,10 @@ describe('repackFintIdmEnheter works as expected when', () => {
     }
     const repackResult = repackFintIdmEnheter(validationResult.tests.topUnits.data, validationResult.validUnits, aditroUnits, exceptionRules)
 
-    expect(repackResult.tests.correspondingBottomUnitMissing.data.length).toBe(0)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitMissing.data.length, 0)
+    assert.strictEqual(repackResult.tests.correspondingBottomUnitDifferentName.data.length, 0)
 
-    expect(repackResult.tests.correspondingBottomUnitDifferentName.data.length).toBe(0)
-
-    expect(repackResult.handledByExceptionRules.length).toBe(6)
+    assert.strictEqual(repackResult.handledByExceptionRules.length, 6)
     const overrideNextProbableLinkRule = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'overrideNextProbableLink' && usedRule.data.organisasjonsId === 'test-fellesvgs-111')
     const useAbstractAsUnitRule1 = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'useAbstractAsUnitOverride' && usedRule.data.organisasjonsId === 'test-fylkeskommune-1')
     const useAbstractAsUnitRule2 = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'useAbstractAsUnitOverride' && usedRule.data.organisasjonsId === 'annen-drit-112')
@@ -451,66 +447,64 @@ describe('repackFintIdmEnheter works as expected when', () => {
     const absorbChildrenOverrideRule = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'absorbChildrenOverrides' && usedRule.data.organisasjonsId === 'test-opplaring-11')
     const manualLeaderRule = repackResult.handledByExceptionRules.some(usedRule => usedRule.rule === 'manualLeaders' && usedRule.data.organisasjonsId === 'test-fylkeskommune-1')
 
-    expect(overrideNextProbableLinkRule).toBe(true)
-    expect(useAbstractAsUnitRule1).toBe(true)
-    expect(useAbstractAsUnitRule2).toBe(true)
-    expect(nameChainOverrideRule).toBe(true)
-    expect(absorbChildrenOverrideRule).toBe(true)
-    expect(manualLeaderRule).toBe(true)
+    assert.strictEqual(overrideNextProbableLinkRule, true)
+    assert.strictEqual(useAbstractAsUnitRule1, true)
+    assert.strictEqual(useAbstractAsUnitRule2, true)
+    assert.strictEqual(nameChainOverrideRule, true)
+    assert.strictEqual(absorbChildrenOverrideRule, true)
+    assert.strictEqual(manualLeaderRule, true)
 
-    expect(repackResult.resultingUnitsFlat.length).toBeGreaterThan(0)
-
-    // Sjekker også om reglene har gjort det de skal...
+    assert.ok(repackResult.resultingUnitsFlat.length > 0)
 
     const abstractUnitResult1 = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-fylkeskommune-1')
-    expect(abstractUnitResult1.organisasjonsId.identifikatorverdi).toBe('test-fylkeskommune-1')
+    assert.strictEqual(abstractUnitResult1.organisasjonsId.identifikatorverdi, 'test-fylkeskommune-1')
 
     const nameChainOverrideResult = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-opplaring-11')
-    expect(nameChainOverrideResult.organisasjonsId.identifikatorverdi).toBe('test-opplaring-1100')
+    assert.strictEqual(nameChainOverrideResult.organisasjonsId.identifikatorverdi, 'test-opplaring-1100')
 
     const absorbChildrenOverrideResult = repackResult.resultingUnitsFlat.find(unit => unit.abstractEnhetOrganisasjonsId === 'test-opplaring-11')
     const inheritedGrandchildren = absorbChildrenOverrideResult._links.underordnet.filter(child => [`${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/annen-drit-1120`, `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/annen-drit-1121`, `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/test-fellesvgs-11100`].includes(child.href))
-    expect(inheritedGrandchildren.length).toBe(3)
+    assert.strictEqual(inheritedGrandchildren.length, 3)
 
     const absorbedChildren = repackResult.resultingUnitsFlat.filter(unit => ['annen-drit-112', 'test-fellesvgs-111', 'test-fellesvgs-1111', 'test-fellesvgs-11110'].includes(unit.organisasjonsId.identifikatorverdi) || ['annen-drit-112', 'test-fellesvgs-111', 'test-fellesvgs-1111', 'test-fellesvgs-11110'].includes(unit.abstractEnhetOrganisasjonsId))
-    expect(absorbedChildren.length).toBe(0)
+    assert.strictEqual(absorbedChildren.length, 0)
 
     const manualLeaderUnit = repackResult.resultingUnitsFlat.find(unit => unit.organisasjonsId.identifikatorverdi === 'test-fylkeskommune-1')
-    expect(manualLeaderUnit._links.leder[0].href).toBe(`${url}/administrasjon/personal/personalressurs/ansattnummer/1234567`)
+    assert.strictEqual(manualLeaderUnit._links.leder[0].href, `${url}/administrasjon/personal/personalressurs/ansattnummer/1234567`)
 
-    expect(repackResult.tests.notTriggeredExceptionRules.data.length).toBe(0)
-    expect(repackResult.tests.handledMoreThanOneTimeUnits.data.length).toBe(0)
-    expect(repackResult.tests.notHandledUnits.data.length).toBe(0)
+    assert.strictEqual(repackResult.tests.notTriggeredExceptionRules.data.length, 0)
+    assert.strictEqual(repackResult.tests.handledMoreThanOneTimeUnits.data.length, 0)
+    assert.strictEqual(repackResult.tests.notHandledUnits.data.length, 0)
 
-    expect(repackResult.resultingUnitsFlat.some(unit => typeof unit.organisasjonsType.navn !== 'string' || unit.organisasjonsType.navn.length < 1)).toBe(false)
+    assert.strictEqual(repackResult.resultingUnitsFlat.some(unit => typeof unit.organisasjonsType.navn !== 'string' || unit.organisasjonsType.navn.length < 1), false)
 
-    expect(repackResult.valid).toBe(true)
+    assert.strictEqual(repackResult.valid, true)
   })
-  test('We mess with aditro units and get invalid result', () => {
+  it('We mess with aditro units and get invalid result', () => {
     const { aditroUnits, units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
 
     const bottomUnitOrganisasjonsId = 'annen-drit-1120'
-    aditroUnits.delete(bottomUnitOrganisasjonsId) // Remove one of the aditro units that should be present
+    aditroUnits.delete(bottomUnitOrganisasjonsId)
 
     aditroUnits.set('test-organisasjon-13000', { lonnOrganizationId: 'test-organisasjon-13000', description: 'samma det', projectDimension6Hours: undefined })
     aditroUnits.set('test-fellesvgs-11110', { lonnOrganizationId: 'test-fellesvgs-11110', description: 'samma det', projectDimension6Hours: { id: 'halla holder ikke' } })
     aditroUnits.set('test-digi-13010', { lonnOrganizationId: 'test-digi-13010', description: 'samma det da', projectDimension6Hours: { id: 'prupp', kode: '', beskrivelse: '' } })
 
-    const exceptionRules = getValidExcepttionRules() // Gets valid rules
+    const exceptionRules = getValidExcepttionRules()
 
     const repackResult = repackFintIdmEnheter(validationResult.tests.topUnits.data, validationResult.validUnits, aditroUnits, exceptionRules)
 
     console.log(repackResult.tests.missingAditroOrgType.data)
 
-    expect(repackResult.tests.missingAditroUnit.data.length).toBe(1)
-    expect(repackResult.tests.missingAditroUnit.data[0].organisasjonsId).toBe(bottomUnitOrganisasjonsId)
+    assert.strictEqual(repackResult.tests.missingAditroUnit.data.length, 1)
+    assert.strictEqual(repackResult.tests.missingAditroUnit.data[0].organisasjonsId, bottomUnitOrganisasjonsId)
 
-    expect(repackResult.tests.missingAditroOrgType.data.length).toBe(3)
-    expect(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-organisasjon-13000')).toBe(true)
-    expect(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-fellesvgs-11110')).toBe(true)
-    expect(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-digi-13010')).toBe(true)
+    assert.strictEqual(repackResult.tests.missingAditroOrgType.data.length, 3)
+    assert.strictEqual(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-organisasjon-13000'), true)
+    assert.strictEqual(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-fellesvgs-11110'), true)
+    assert.strictEqual(repackResult.tests.missingAditroOrgType.data.some(unit => unit.organisasjonsId === 'test-digi-13010'), true)
 
-    expect(repackResult.valid).toBe(false)
+    assert.strictEqual(repackResult.valid, false)
   })
 })

@@ -1,31 +1,30 @@
+const { describe, it } = require('node:test')
+const assert = require('node:assert/strict')
 const { aktivPeriode, repackPeriode, repackLeder, createStruktur } = require('../../lib/helpers/repack-fint')
 
 describe('aktivPeriode is aktiv when', () => {
-  test('Sluttdato is null', () => {
+  it('Sluttdato is null', () => {
     const periode = {
       start: '2019-08-01T00:00:00Z',
       slutt: null
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(true)
+    assert.strictEqual(aktivPeriode(periode), true)
   })
-  test('Sluttdato is false', () => {
+  it('Sluttdato is false', () => {
     const periode = {
       start: '2019-08-01T00:00:00Z',
       slutt: false
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(true)
+    assert.strictEqual(aktivPeriode(periode), true)
   })
-  test('Sluttdato is invalid date', () => {
+  it('Sluttdato is invalid date', () => {
     const periode = {
       start: '2019-08-01T00:00:00Z',
       slutt: 'trompetsolo'
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(true)
+    assert.strictEqual(aktivPeriode(periode), true)
   })
-  test('Sluttdato is not reached', () => {
+  it('Sluttdato is not reached', () => {
     const now = new Date()
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -33,13 +32,12 @@ describe('aktivPeriode is aktiv when', () => {
       start: '2019-08-01T00:00:00Z',
       slutt: tomorrow.toISOString()
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(true)
+    assert.strictEqual(aktivPeriode(periode), true)
   })
 })
 
 describe('aktivPeriode is NOT aktiv when', () => {
-  test('Sluttdato is reached', () => {
+  it('Sluttdato is reached', () => {
     const now = new Date()
     const yesterday = new Date(now)
     yesterday.setDate(yesterday.getDate() - 1)
@@ -47,10 +45,9 @@ describe('aktivPeriode is NOT aktiv when', () => {
       start: '2019-08-01T00:00:00Z',
       slutt: yesterday.toISOString()
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(false)
+    assert.strictEqual(aktivPeriode(periode), false)
   })
-  test('Startdato is not reached yet', () => {
+  it('Startdato is not reached yet', () => {
     const now = new Date()
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -58,16 +55,14 @@ describe('aktivPeriode is NOT aktiv when', () => {
       start: tomorrow.toISOString(),
       slutt: false
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(false)
+    assert.strictEqual(aktivPeriode(periode), false)
   })
-  test('Startdato is invalid date', () => {
+  it('Startdato is invalid date', () => {
     const periode = {
       start: 'tubasolo',
       slutt: 'trompetsolo'
     }
-    const aktiv = aktivPeriode(periode)
-    expect(aktiv).toBe(false)
+    assert.strictEqual(aktivPeriode(periode), false)
   })
 })
 
@@ -75,14 +70,14 @@ describe('repackPeriode works as expected', () => {
   const today = new Date()
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
-  test('Regular FINT periode has values and is aktiv', () => {
+  it('Regular FINT periode has values and is aktiv', () => {
     const periode = {
       beskrivelse: 'Test periode',
       start: '2019-08-01T12:00:00.000Z',
       slutt: '2051-08-31T12:00:00.000Z'
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: '2019-08-01T00:00:00.000Z',
       slutt: '2051-08-31T23:59:59.999Z',
@@ -91,14 +86,14 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('Regular FINT periode has values and is not aktiv', () => {
+  it('Regular FINT periode has values and is not aktiv', () => {
     const periode = {
       beskrivelse: 'Test periode',
       start: '2019-08-01T12:00:00.000Z',
       slutt: '2019-08-31T12:00:00.000Z'
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: '2019-08-01T00:00:00.000Z',
       slutt: '2019-08-31T23:59:59.999Z',
@@ -107,7 +102,7 @@ describe('repackPeriode works as expected', () => {
       aktiv: false
     })
   })
-  test('Regular FINT periode has values and has funny case where start is today but timstamp not reached yet - should be aktiv', () => {
+  it('Regular FINT periode has values and has funny case where start is today but timstamp not reached yet - should be aktiv', () => {
     const inTenMinutes = new Date(today.getTime() + 10 * 60 * 1000).toISOString()
     const periode = {
       beskrivelse: 'Test periode',
@@ -115,7 +110,7 @@ describe('repackPeriode works as expected', () => {
       slutt: '2051-08-31T12:00:00.000Z'
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: `${inTenMinutes.substring(0, 11)}00:00:00.000Z`,
       slutt: '2051-08-31T23:59:59.999Z',
@@ -124,7 +119,7 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('Regular FINT periode has values and has funny case where end is today and timstamp is reached - should be aktiv', () => {
+  it('Regular FINT periode has values and has funny case where end is today and timstamp is reached - should be aktiv', () => {
     const tenMinutesAgo = new Date(today.getTime() - 10 * 60 * 1000).toISOString()
     const periode = {
       beskrivelse: 'Test periode',
@@ -132,7 +127,7 @@ describe('repackPeriode works as expected', () => {
       slutt: tenMinutesAgo
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: '2021-08-31T00:00:00.000Z',
       slutt: `${tenMinutesAgo.substring(0, 11)}23:59:59.999Z`,
@@ -141,10 +136,9 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('No periode... should be aktiv and null values', () => {
-    const periode = null
-    const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+  it('No periode... should be aktiv and null values', () => {
+    const repacked = repackPeriode(null)
+    assert.deepStrictEqual(repacked, {
       beskrivelse: null,
       start: null,
       slutt: null,
@@ -153,14 +147,14 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('Slutt is null, start is in the past - should be aktiv', () => {
+  it('Slutt is null, start is in the past - should be aktiv', () => {
     const periode = {
       beskrivelse: 'Test periode',
       start: '2019-08-01T12:00:00.000Z',
       slutt: null
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: '2019-08-01T00:00:00.000Z',
       slutt: null,
@@ -169,14 +163,14 @@ describe('repackPeriode works as expected', () => {
       aktiv: true
     })
   })
-  test('Start is null, should not be aktiv', () => {
+  it('Start is null, should not be aktiv', () => {
     const periode = {
       beskrivelse: 'Test periode',
       start: null,
       slutt: 'Promp'
     }
     const repacked = repackPeriode(periode)
-    expect(repacked).toEqual({
+    assert.deepStrictEqual(repacked, {
       beskrivelse: 'Test periode',
       start: null,
       slutt: null,
@@ -188,10 +182,9 @@ describe('repackPeriode works as expected', () => {
 })
 
 describe('repackLeder work as excpected when', () => {
-  test('there is no leder', () => {
-    const leder = null
-    const repackedLeder = repackLeder(leder)
-    expect(repackedLeder).toEqual({
+  it('there is no leder', () => {
+    const repackedLeder = repackLeder(null)
+    assert.deepStrictEqual(repackedLeder, {
       ansattnummer: null,
       navn: null,
       fornavn: null,
@@ -199,7 +192,7 @@ describe('repackLeder work as excpected when', () => {
       kontaktEpostadresse: null
     })
   })
-  test('there is a leder with some props missing', () => {
+  it('there is a leder with some props missing', () => {
     const leder = {
       ansattnummer: {
         identifikatorverdi: '12345'
@@ -212,7 +205,7 @@ describe('repackLeder work as excpected when', () => {
       }
     }
     const repackedLeder = repackLeder(leder)
-    expect(repackedLeder).toEqual({
+    assert.deepStrictEqual(repackedLeder, {
       ansattnummer: '12345',
       navn: 'Arne Bjarne',
       fornavn: 'Arne',
@@ -220,7 +213,7 @@ describe('repackLeder work as excpected when', () => {
       kontaktEpostadresse: null
     })
   })
-  test('there is a leder with all props', () => {
+  it('there is a leder with all props', () => {
     const leder = {
       ansattnummer: {
         identifikatorverdi: '12345'
@@ -236,7 +229,7 @@ describe('repackLeder work as excpected when', () => {
       }
     }
     const repackedLeder = repackLeder(leder)
-    expect(repackedLeder).toEqual({
+    assert.deepStrictEqual(repackedLeder, {
       ansattnummer: '12345',
       navn: 'Arne Bjarne',
       fornavn: 'Arne',
@@ -247,7 +240,7 @@ describe('repackLeder work as excpected when', () => {
 })
 
 describe('createStruktur works as expected when', () => {
-  test('using fixedOrgFlat and graphQlFlat', () => {
+  it('using fixedOrgFlat and graphQlFlat', () => {
     const fixedOrgFlat = [
       {
         organisasjonsId: { identifikatorverdi: '1' },
@@ -321,7 +314,7 @@ describe('createStruktur works as expected when', () => {
       }
     ]
     const shouldBeOk = createStruktur({ organisasjonsId: { identifikatorverdi: '4' } }, fixedOrgFlat, graphQlFlat)
-    expect(shouldBeOk).toEqual([
+    assert.deepStrictEqual(shouldBeOk, [
       {
         kortnavn: 'F-S-S-T',
         navn: 'Team',
@@ -376,12 +369,12 @@ describe('createStruktur works as expected when', () => {
       }
     ])
     const shouldAlsoBeOk = createStruktur({ organisasjonsId: { identifikatorverdi: '2' } }, fixedOrgFlat, graphQlFlat)
-    expect(shouldAlsoBeOk.length).toBe(2)
-    expect(shouldAlsoBeOk[0].navn).toBe('Sektor')
+    assert.strictEqual(shouldAlsoBeOk.length, 2)
+    assert.strictEqual(shouldAlsoBeOk[0].navn, 'Sektor')
     const shouldAlsoAlsoBeOk = createStruktur({ organisasjonsId: { identifikatorverdi: '1' } }, fixedOrgFlat, graphQlFlat)
-    expect(shouldAlsoAlsoBeOk.length).toBe(1)
-    expect(shouldAlsoAlsoBeOk[0].navn).toBe('Fylke')
+    assert.strictEqual(shouldAlsoAlsoBeOk.length, 1)
+    assert.strictEqual(shouldAlsoAlsoBeOk[0].navn, 'Fylke')
     const shouldReturnEmptyArray = createStruktur({ organisasjonsId: { identifikatorverdi: '5' } }, fixedOrgFlat, graphQlFlat)
-    expect(shouldReturnEmptyArray).toEqual([])
+    assert.deepStrictEqual(shouldReturnEmptyArray, [])
   })
 })
