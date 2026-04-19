@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@azure/msal-node": "^5.1.1",
+    "@vestfoldfylke/loglady": "^1.5.3",
     "@vtfk/logger": "^6.4.2",
     "axios": "^1.13.6",
-    "file-system-cache": "^2.4.7",
     "jsonwebtoken": "^9.0.3"
   }
 }
