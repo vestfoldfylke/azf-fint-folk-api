@@ -1,15 +1,15 @@
-import { logger, logConfig } from '@vtfk/logger'
+import { logger } from '@vestfoldfylke/loglady'
 import { teamsStatusAlert } from '../lib/fint-organization-fixed/teams-status-alert.js'
 
 export default async function (context, myTimer) {
-  logConfig({
+  logger.logConfig({
     prefix: 'azf-fint-folk - IDM Teams Status'
   })
-  logger('info', ['Running timer trigger'], context)
+  logger.info('Running timer trigger')
 
   try {
     await teamsStatusAlert(context)
   } catch (error) {
-    logger('error', ['Teams status alert failed...', error.response?.data || error.stack || error.toString()])
+    logger.error('Teams status alert failed... {err}', error.response?.data || error.stack || error.toString())
   }
 }

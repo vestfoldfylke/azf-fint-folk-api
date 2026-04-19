@@ -1,4 +1,4 @@
-import { logger, logConfig } from '@vtfk/logger'
+import { logger } from '@vestfoldfylke/loglady'
 import { decodeAccessToken } from '../lib/helpers/decode-access-token.js'
 import httpResponse from '../lib/requests/http-response.js'
 import { isFnr } from '../lib/helpers/identifikator-type.js'
@@ -7,22 +7,21 @@ import { fintPerson } from '../lib/fint-person.js'
 import { getResponse, setResponse } from '../lib/response-cache.js'
 
 export default async function (context, req) {
-  logConfig({
+  logger.logConfig({
     prefix: 'azf-fint-folk - Person'
-
   })
-  logger('info', ['New Request. Validating token'], context)
+  logger.info('New Request. Validating token')
   const decoded = decodeAccessToken(req.headers.authorization)
   if (!decoded.verified) {
-    logger('warn', ['Token is not valid', decoded.msg], context)
+    logger.warn('Token is not valid {msg}', decoded.msg)
     return httpResponse(401, decoded.msg)
   }
-  logConfig({
+  logger.logConfig({
     prefix: `azf-fint-folk - Person - ${decoded.appid}${decoded.upn ? ' - ' + decoded.upn : ''}`
   })
-  logger('info', ['Token is valid, checking params'], context)
+  logger.info('Token is valid, checking params')
   if (!req.params) {
-    logger('info', ['No params here...'], context)
+    logger.info('No params here...')
     return httpResponse(400, 'Missing query params')
   }
 
@@ -32,12 +31,12 @@ export default async function (context, req) {
 
   if (identifikator === 'fodselsnummer' && !isFnr(identifikatorverdi)) return httpResponse(400, 'Property "fodselsnummer" must be 11 characters')
 
-  logger('info', ['Validating role'], context)
+  logger.info('Validating role')
   if (!decoded.roles.includes(roles.personRead) && !decoded.roles.includes(roles.readAll)) {
-    logger('info', ['Missing required role for access'], context)
+    logger.info('Missing required role for access')
     return httpResponse(403, 'Missing required role for access')
   }
-  logger('info', ['Role validated'], context)
+  logger.info('Role validated')
 
   // Cache
   if (req.query.skipCache !== 'true') {
@@ -57,7 +56,7 @@ export default async function (context, req) {
     if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
     return httpResponse(200, result)
   } catch (error) {
-    logger('error', ['Failed when fetching person from FINT', error.response?.data || error.stack || error.toString()], context)
+    logger.error('Failed when fetching person from FINT {err}', error.response?.data || error.stack || error.toString())
     return httpResponse(500, error)
   }
 }

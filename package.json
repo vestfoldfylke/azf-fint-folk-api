@@ -10,7 +10,6 @@
   "dependencies": {
     "@azure/msal-node": "^5.1.1",
     "@vestfoldfylke/loglady": "^1.5.3",
-    "@vtfk/logger": "^6.4.2",
     "axios": "^1.13.6",
     "jsonwebtoken": "^9.0.3"
   }
