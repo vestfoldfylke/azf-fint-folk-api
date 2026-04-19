@@ -1,13 +1,13 @@
-const { fintStudent } = require('../lib/fint-student')
-const { logger, logConfig } = require('@vtfk/logger')
-const { decodeAccessToken } = require('../lib/helpers/decode-access-token')
-const httpResponse = require('../lib/requests/http-response')
-const { isEmail, isFnr } = require('../lib/helpers/identifikator-type')
-const { roles, studentUpnSuffix, feidenavnDomain } = require('../config')
-const { fintGraph } = require('../lib/requests/call-fint')
-const { getResponse, setResponse } = require('../lib/response-cache')
+import { fintStudent } from '../lib/fint-student.js'
+import { logger, logConfig } from '@vtfk/logger'
+import { decodeAccessToken } from '../lib/helpers/decode-access-token.js'
+import httpResponse from '../lib/requests/http-response.js'
+import { isEmail, isFnr } from '../lib/helpers/identifikator-type.js'
+import { roles, studentUpnSuffix, feidenavnDomain } from '../config.js'
+import { fintGraph } from '../lib/requests/call-fint.js'
+import { getResponse, setResponse } from '../lib/response-cache.js'
 
-module.exports = async function (context, req) {
+export default async function (context, req) {
   logConfig({
     prefix: 'azf-fint-folk - Student'
   })
@@ -121,7 +121,7 @@ module.exports = async function (context, req) {
     const res = await fintStudent(feidenavn, elevnummer, context)
     if (!res) return httpResponse(404, 'No student with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
-    if (req.query.skipCache !== 'true') setResponse(req.url, result, context) // Cache result
+    if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
     return httpResponse(200, result)
   } catch (error) {
     logger('error', ['Failed when getting student from FINT', error.response?.data || error.stack || error.toString()], context)

@@ -1,14 +1,14 @@
-const { fintEmployee } = require('../lib/fint-employee')
-const { logger, logConfig } = require('@vtfk/logger')
-const { decodeAccessToken } = require('../lib/helpers/decode-access-token')
-const httpResponse = require('../lib/requests/http-response')
-const { roles } = require('../config')
-const { getAnsattnummer } = require('../lib/requests/call-graph')
-const { fintGraph } = require('../lib/requests/call-fint')
-const { isAnsattnummer, isEmail, isFnr } = require('../lib/helpers/identifikator-type')
-const { getResponse, setResponse } = require('../lib/response-cache')
+import { fintEmployee } from '../lib/fint-employee.js'
+import { logger, logConfig } from '@vtfk/logger'
+import { decodeAccessToken } from '../lib/helpers/decode-access-token.js'
+import httpResponse from '../lib/requests/http-response.js'
+import { roles } from '../config.js'
+import { getAnsattnummer } from '../lib/requests/call-graph.js'
+import { fintGraph } from '../lib/requests/call-fint.js'
+import { isAnsattnummer, isEmail, isFnr } from '../lib/helpers/identifikator-type.js'
+import { getResponse, setResponse } from '../lib/response-cache.js'
 
-module.exports = async function (context, req) {
+export default async function (context, req) {
   logConfig({
     prefix: 'azf-fint-folk - Employee'
   })
@@ -99,7 +99,7 @@ module.exports = async function (context, req) {
     const res = await fintEmployee(ansattnummer, context)
     if (!res) return httpResponse(404, 'No employee with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
-    if (req.query.skipCache !== 'true') setResponse(req.url, result, context) // Cache result
+    if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
     return httpResponse(200, result)
   } catch (error) {
     logger('error', ['Failed when getting employee from FINT', error.response?.data || error.stack || error.toString()], context)

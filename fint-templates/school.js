@@ -1,4 +1,4 @@
-module.exports = (schoolNumber, includeStudentSsn, includeUndervisningsgrupper) => {
+export default (schoolNumber, includeStudentSsn, includeUndervisningsgrupper) => {
   // Tabbed out for correct placement in the final query
   const undervisningsgruppeQuery = includeUndervisningsgrupper ? `
           undervisningsgruppe {

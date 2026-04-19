@@ -1,4 +1,4 @@
-module.exports = (ansattnummer) => {
+export default (ansattnummer) => {
   return {
     query: `
       query {

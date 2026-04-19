@@ -1,14 +1,14 @@
-const { logger, logConfig } = require('@vtfk/logger')
-const { decodeAccessToken } = require('../lib/helpers/decode-access-token')
-const httpResponse = require('../lib/requests/http-response')
-const { roles, topUnitId } = require('../config')
-const { getResponse, setResponse } = require('../lib/response-cache')
-const { fintOrganizationFixedIdm } = require('../lib/fint-organization-fixed/idm')
-const { fixedOrganizationFlat } = require('../lib/fint-organization-fixed/fixed-organization-flat')
-const { fixedOrganizationStructure } = require('../lib/fint-organization-fixed/fixed-organization-structure')
-const { fixedOrganization } = require('../lib/fint-organization-fixed/fixed-organization')
+import { logger, logConfig } from '@vtfk/logger'
+import { decodeAccessToken } from '../lib/helpers/decode-access-token.js'
+import httpResponse from '../lib/requests/http-response.js'
+import { roles, topUnitId } from '../config.js'
+import { getResponse, setResponse } from '../lib/response-cache.js'
+import { fintOrganizationFixedIdm } from '../lib/fint-organization-fixed/idm.js'
+import { fixedOrganizationFlat } from '../lib/fint-organization-fixed/fixed-organization-flat.js'
+import { fixedOrganizationStructure } from '../lib/fint-organization-fixed/fixed-organization-structure.js'
+import { fixedOrganization } from '../lib/fint-organization-fixed/fixed-organization.js'
 
-module.exports = async function (context, req) {
+export default async function (context, req) {
   logConfig({
     prefix: 'azf-fint-folk - Organization'
   })
@@ -77,7 +77,7 @@ module.exports = async function (context, req) {
         size: repackedFintUnitsResult.resultingUnitsFlat.length
       }
 
-      if (req.query.skipCache !== 'true') setResponse(req.url, resultingResponse, context) // Cache result
+      if (req.query.skipCache !== 'true') setResponse(req.url, resultingResponse) // Cache result
       return httpResponse(200, resultingResponse)
     } catch (error) {
       logger('error', ['Failed when fetching organization fixed from FINT', error.response?.data || error.stack || error.toString()], context)
@@ -92,7 +92,7 @@ module.exports = async function (context, req) {
       const res = await fixedOrganizationStructure(includeInactiveUnits, context)
       if (!res) return httpResponse(404, `No organizationUnit with organisasjonsId "${topUnitId}" found in FINT`)
       const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
-      if (req.query.skipCache !== 'true') setResponse(req.url, result, context) // Cache result
+      if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
       return httpResponse(200, result)
     } catch (error) {
       logger('error', ['Failed when fetching organization structure from FINT', error.response?.data || error.stack || error.toString()], context)
@@ -107,7 +107,7 @@ module.exports = async function (context, req) {
       if (req.query.includeInactiveUnits !== 'true') res.repacked = res.repacked.filter(unit => unit.aktiv && unit.overordnet.aktiv) // Filter out inactive units if not requested (in structure, this is done in the repack function)
       if (!res) return httpResponse(404, `No organizationUnit with organisasjonsId "${topUnitId}" found in FINT`)
       const result = req.query.includeRaw === 'true' ? { flat: res.repacked.reverse(), raw: res.raw } : res.repacked.reverse()
-      if (req.query.skipCache !== 'true') setResponse(req.url, result, context) // Cache result
+      if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
       return httpResponse(200, result)
     } catch (error) {
       logger('error', ['Failed when fetching flat fixed organization structure from FINT', error.response?.data || error.stack || error.toString()], context)
@@ -120,7 +120,7 @@ module.exports = async function (context, req) {
     if (!res) return httpResponse(404, `No organizationUnit with ${identifikator} "${identifikatorverdi}" found in FINT`)
     if (req.query.includeInactiveEmployees !== 'true') res.repacked.arbeidsforhold = res.repacked.arbeidsforhold.filter(forhold => forhold.aktiv)
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
-    if (!req.query.skipCache) setResponse(req.url, result, context) // Cache result
+    if (!req.query.skipCache) setResponse(req.url, result) // Cache result
     return httpResponse(200, result)
   } catch (error) {
     logger('error', ['Failed when fetching organization from FINT', error.response?.data || error.stack || error.toString()], context)

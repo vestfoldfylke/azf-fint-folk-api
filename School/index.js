@@ -1,11 +1,11 @@
-const { fintSchool } = require('../lib/fint-school')
-const { logger, logConfig } = require('@vtfk/logger')
-const { decodeAccessToken } = require('../lib/helpers/decode-access-token')
-const httpResponse = require('../lib/requests/http-response')
-const { roles } = require('../config')
-const { getResponse, setResponse } = require('../lib/response-cache')
+import { fintSchool } from '../lib/fint-school.js'
+import { logger, logConfig } from '@vtfk/logger'
+import { decodeAccessToken } from '../lib/helpers/decode-access-token.js'
+import httpResponse from '../lib/requests/http-response.js'
+import { roles } from '../config.js'
+import { getResponse, setResponse } from '../lib/response-cache.js'
 
-module.exports = async function (context, req) {
+export default async function (context, req) {
   logConfig({
     prefix: 'azf-fint-folk - School'
   })
@@ -53,7 +53,7 @@ module.exports = async function (context, req) {
     const res = await fintSchool(schoolNumber, includeStudentSsn, context)
     if (!res) return httpResponse(404, 'No school with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
-    if (req.query.skipCache !== 'true') setResponse(req.url, result, context)
+    if (req.query.skipCache !== 'true') setResponse(req.url, result)
     return httpResponse(200, result)
   } catch (error) {
     logger('error', ['Failed when getting school from FINT', error.response?.data || error.stack || error.toString()], context)

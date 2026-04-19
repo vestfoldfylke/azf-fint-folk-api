@@ -1,4 +1,4 @@
-module.exports = (fodselsnummer) => {
+export default (fodselsnummer) => {
   return {
     query: `
       query {

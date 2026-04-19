@@ -1,10 +1,11 @@
-const { describe, it } = require('node:test')
-const assert = require('node:assert/strict')
-const { organizationFixed, fint: { url } } = require('../../config')
-const { getExceptionRules } = require('../../lib/fint-organization-fixed/exception-rules')
-const { repackFintIdmEnheter, vgsNameChain } = require('../../lib/fint-organization-fixed/idm')
-const { validateRawOrganizationUnits } = require('../../lib/fint-organization-fixed/idm-validation')
-const { createTestOrgUnit, createAditroUnits, getValidExcepttionRules } = require('./test-org')
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { organizationFixed, fint } from '../../config.js'
+const { url } = fint
+import { getExceptionRules } from '../../lib/fint-organization-fixed/exception-rules.js'
+import { repackFintIdmEnheter, vgsNameChain } from '../../lib/fint-organization-fixed/idm.js'
+import { validateRawOrganizationUnits } from '../../lib/fint-organization-fixed/idm-validation.js'
+import { createTestOrgUnit, createAditroUnits, getValidExcepttionRules } from './test-org.js'
 
 const createTestOrg = () => {
   const units = [

@@ -1,7 +1,7 @@
-const { logger, logConfig } = require('@vtfk/logger')
-const { teamsStatusAlert } = require('../lib/fint-organization-fixed/teams-status-alert')
+import { logger, logConfig } from '@vtfk/logger'
+import { teamsStatusAlert } from '../lib/fint-organization-fixed/teams-status-alert.js'
 
-module.exports = async function (context, myTimer) {
+export default async function (context, myTimer) {
   logConfig({
     prefix: 'azf-fint-folk - IDM Teams Status'
   })

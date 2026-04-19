@@ -1,6 +1,6 @@
-const { topUnitId } = require('../config')
+import { topUnitId } from '../config.js'
 
-module.exports = () => {
+export default () => {
 	const base = `
 		organisasjonsId {
 			identifikatorverdi

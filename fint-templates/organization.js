@@ -1,4 +1,4 @@
-module.exports = (identifikator, identifikatorverdi) => {
+export default (identifikator, identifikatorverdi) => {
   return {
     query: `
       query {

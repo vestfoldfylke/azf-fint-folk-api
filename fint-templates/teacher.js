@@ -1,4 +1,4 @@
-module.exports = (feidenavn, includeStudentSsn) => {
+export default (feidenavn, includeStudentSsn) => {
   return {
     query: `
       query {

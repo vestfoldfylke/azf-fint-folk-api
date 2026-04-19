@@ -1,6 +1,6 @@
-const { describe, it } = require('node:test')
-const assert = require('node:assert/strict')
-const { aktivPeriode, repackPeriode, repackLeder, createStruktur } = require('../../lib/helpers/repack-fint')
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { aktivPeriode, repackPeriode, repackLeder, createStruktur } from '../../lib/helpers/repack-fint.js'
 
 describe('aktivPeriode is aktiv when', () => {
   it('Sluttdato is null', () => {
