@@ -54,12 +54,14 @@ export default async function (context, req) {
     logger.info('Queryparam is type "upn", fetching ansattnummer from AzureAD')
     try {
       ansattnummer = await getAnsattnummer(identifikatorverdi)
-      logger.info(`Got ansattnummer: ${ansattnummer}`)
-    } catch (error) {
-      if (error.response?.status === 404) {
-        logger.error('No user with provided upn found in EntraID {err}', error.response?.data || error.stack || error.toString())
+
+      if (!ansattnummer) {
+        logger.error('No user with provided upn found in EntraID')
         return httpResponse(404, 'No user with provided upn found in EntraID')
       }
+
+      logger.info(`Got ansattnummer: ${ansattnummer}`)
+    } catch (error) {
       logger.error('Failed when getting ansattnummer from AzureAD {err}', error.response?.data || error.stack || error.toString())
       return httpResponse(500, error)
     }

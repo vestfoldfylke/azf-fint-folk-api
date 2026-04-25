@@ -54,12 +54,12 @@ export default async function (context, req) {
     logger.info('Queryparam is type "upn", fetching feidenavn from EntraID')
     try {
       feidenavn = await getFeidenavn(identifikatorverdi)
-      logger.info(`Got feidenavn: ${feidenavn}`)
-    } catch (error) {
-      if (error.response?.status === 404) {
-        logger.error('No user with provided upn found in EntraID {err}', error.response?.data || error.stack || error.toString())
+      if (!feidenavn) {
+        logger.error('No user with provided upn found in EntraID')
         return httpResponse(404, 'No user with provided upn found in EntraID')
       }
+      logger.info(`Got feidenavn: ${feidenavn}`)
+    } catch (error) {
       logger.error('Failed when getting feidenavn from EntraID {err}', error.response?.data || error.stack || error.toString())
       return httpResponse(500, error)
     }
