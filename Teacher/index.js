@@ -44,7 +44,7 @@ export default async function (context, req) {
 
   // Cache
   if (req.query.skipCache !== 'true') {
-    const cachedResponse = getResponse(req.url, context)
+    const cachedResponse = getResponse(req.url)
     if (cachedResponse) return httpResponse(200, cachedResponse)
   }
 
@@ -53,7 +53,7 @@ export default async function (context, req) {
   if (identifikator === 'upn') {
     logger.info('Queryparam is type "upn", fetching feidenavn from EntraID')
     try {
-      feidenavn = await getFeidenavn(identifikatorverdi, context)
+      feidenavn = await getFeidenavn(identifikatorverdi)
       logger.info(`Got feidenavn: ${feidenavn}`)
     } catch (error) {
       if (error.response?.status === 404) {
@@ -82,10 +82,10 @@ export default async function (context, req) {
           }
         `
       }
-      const { data } = await fintGraph(payload, context)
+      const { data } = await fintGraph(payload)
       const ansattnummer = data.person?.personalressurs?.ansattnummer?.identifikatorverdi
       if (!ansattnummer) return httpResponse(404, 'No teacher with provided identificator found in FINT')
-      const azureFeidenavnRes = await getFeidenavnFromAnsattnummer(ansattnummer, context)
+      const azureFeidenavnRes = await getFeidenavnFromAnsattnummer(ansattnummer)
       if (!azureFeidenavnRes) return httpResponse(404, 'No teacher with provided identificator found in FINT')
       feidenavn = azureFeidenavnRes.feidenavn
     } catch (error) {
@@ -99,7 +99,7 @@ export default async function (context, req) {
 
   try {
     const includeStudentSsn = req.query.includeStudentSsn === 'true'
-    const res = await fintTeacher(feidenavn, includeStudentSsn, context)
+    const res = await fintTeacher(feidenavn, includeStudentSsn)
     if (!res) return httpResponse(404, 'No teacher with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
     if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result

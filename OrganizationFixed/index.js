@@ -40,15 +40,14 @@ export default async function (context, req) {
 
   // Cache
   if (req.query.skipCache !== 'true') {
-    const cachedResponse = getResponse(req.url, context)
+    const cachedResponse = getResponse(req.url)
     if (cachedResponse) return httpResponse(200, cachedResponse)
   }
 
   // If fixed idm-units are requested
   if (identifikator === 'idm') {
     try {
-      // await teamsStatusAlert(context)
-      const { rawValidationResult, exceptionRuleValidationResult, repackedFintUnitsResult } = await fintOrganizationFixedIdm(context)
+      const { rawValidationResult, exceptionRuleValidationResult, repackedFintUnitsResult } = await fintOrganizationFixedIdm()
 
       // Check if we should only validate
       if (identifikatorverdi === 'validate') {
@@ -89,7 +88,7 @@ export default async function (context, req) {
   if (identifikator === 'structure') {
     try {
       const includeInactiveUnits = req.query.includeInactiveUnits === 'true'
-      const res = await fixedOrganizationStructure(includeInactiveUnits, context)
+      const res = await fixedOrganizationStructure(includeInactiveUnits)
       if (!res) return httpResponse(404, `No organizationUnit with organisasjonsId "${topUnitId}" found in FINT`)
       const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
       if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result
@@ -103,7 +102,7 @@ export default async function (context, req) {
   // If all units are requested and flattened (array)
   if (identifikator === 'flat') {
     try {
-      const res = await fixedOrganizationFlat(context)
+      const res = await fixedOrganizationFlat()
       if (req.query.includeInactiveUnits !== 'true') res.repacked = res.repacked.filter(unit => unit.aktiv && unit.overordnet.aktiv) // Filter out inactive units if not requested (in structure, this is done in the repack function)
       if (!res) return httpResponse(404, `No organizationUnit with organisasjonsId "${topUnitId}" found in FINT`)
       const result = req.query.includeRaw === 'true' ? { flat: res.repacked.reverse(), raw: res.raw } : res.repacked.reverse()
@@ -116,7 +115,7 @@ export default async function (context, req) {
   }
 
   try {
-    const res = await fixedOrganization(identifikator, identifikatorverdi, context)
+    const res = await fixedOrganization(identifikator, identifikatorverdi)
     if (!res) return httpResponse(404, `No organizationUnit with ${identifikator} "${identifikatorverdi}" found in FINT`)
     if (req.query.includeInactiveEmployees !== 'true') res.repacked.arbeidsforhold = res.repacked.arbeidsforhold.filter(forhold => forhold.aktiv)
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked

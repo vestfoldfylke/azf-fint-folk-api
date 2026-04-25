@@ -39,7 +39,7 @@ export default async function (context, req) {
 
   // Cache
   if (req.query.skipCache !== 'true') {
-    const cachedResponse = getResponse(req.url, context)
+    const cachedResponse = getResponse(req.url)
     if (cachedResponse) return httpResponse(200, cachedResponse)
   }
 
@@ -50,7 +50,7 @@ export default async function (context, req) {
 
   try {
     const includeStudentSsn = req.query.includeStudentSsn === 'true'
-    const res = await fintSchool(schoolNumber, includeStudentSsn, context)
+    const res = await fintSchool(schoolNumber, includeStudentSsn)
     if (!res) return httpResponse(404, 'No school with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
     if (req.query.skipCache !== 'true') setResponse(req.url, result)

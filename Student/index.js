@@ -43,7 +43,7 @@ export default async function (context, req) {
 
   // Cache
   if (req.query.skipCache !== 'true') {
-    const cachedResponse = getResponse(req.url, context)
+    const cachedResponse = getResponse(req.url)
     if (cachedResponse) return httpResponse(200, cachedResponse)
   }
 
@@ -80,7 +80,7 @@ export default async function (context, req) {
           }
         `
       }
-      const { data } = await fintGraph(payload, context)
+      const { data } = await fintGraph(payload)
       elevnummer = data.person?.elev?.elevnummer?.identifikatorverdi
       if (!elevnummer) return httpResponse(404, 'No student with provided identificator found in FINT')
       logger.info(`Got elevnummer: ${elevnummer}`)
@@ -104,7 +104,7 @@ export default async function (context, req) {
           }
         `
       }
-      const { data } = await fintGraph(payload, context)
+      const { data } = await fintGraph(payload)
       feidenavn = data.person?.elev?.feidenavn?.identifikatorverdi
       if (!feidenavn) return httpResponse(404, 'No student with provided identificator found in FINT')
       logger.info(`Got feidenavn: ${feidenavn}`)
@@ -118,7 +118,7 @@ export default async function (context, req) {
   if (identifikator === 'feidenavn') feidenavn = identifikatorverdi
 
   try {
-    const res = await fintStudent(feidenavn, elevnummer, context)
+    const res = await fintStudent(feidenavn, elevnummer)
     if (!res) return httpResponse(404, 'No student with provided identificator found in FINT')
     const result = req.query.includeRaw === 'true' ? { ...res.repacked, raw: res.raw } : res.repacked
     if (req.query.skipCache !== 'true') setResponse(req.url, result) // Cache result

@@ -8,7 +8,7 @@ export default async function (context, myTimer) {
   logger.info('Running timer trigger')
 
   try {
-    await teamsStatusAlert(context)
+    await teamsStatusAlert()
   } catch (error) {
     logger.error('Teams status alert failed... {err}', error.response?.data || error.stack || error.toString())
   }
