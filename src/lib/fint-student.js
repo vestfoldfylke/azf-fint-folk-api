@@ -196,7 +196,7 @@ const fintStudent = async (feidenavn, elevnummer) => {
   }
   if (!repacked.upn) repacked.upn = null // If no upn was found, set it to null
 
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fintStudent, repackStudent }

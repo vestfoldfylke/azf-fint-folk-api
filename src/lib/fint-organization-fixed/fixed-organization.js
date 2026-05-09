@@ -22,7 +22,7 @@ const fixedOrganization = async (identifikator, identifikatorverdi) => {
   const repacked = repackOrganization(data, fixedOrgFlat, graphQlFlat)
   logger.info('fixedOrganization - Repacked result {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
 
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fixedOrganization }

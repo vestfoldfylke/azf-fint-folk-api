@@ -36,7 +36,6 @@ const fintOrganizationStructure = async (includeInactiveUnits) => {
   const payload = graphQlOrganizationStructure()
   logger.info('fintOrganization - Created graph payload, sending request to FINT - structure')
   const { data } = await fintGraph(payload)
-  const raw = JSON.parse(JSON.stringify(data)) // We modify data when repacking, create a simple copy here
   if (!data.organisasjonselement?.organisasjonsId?.identifikatorverdi) {
     logger.info(`fintOrganization - No organization with organisasjonsId "${topUnitId}" found in FINT`)
     return null
@@ -45,7 +44,7 @@ const fintOrganizationStructure = async (includeInactiveUnits) => {
   const repacked = repackOrganizationStructure(data.organisasjonselement, includeInactiveUnits) // Modifies the object directly, but we return object in question because js, and easier to understand
   logger.info('fintOrganization - Repacked result - structure')
 
-  return { repacked, raw }
+  return repacked
 }
 
 export { fintOrganizationStructure, repackOrganizationStructure }

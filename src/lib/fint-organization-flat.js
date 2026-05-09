@@ -54,17 +54,16 @@ const fintOrganizationFlat = async () => {
   const payload = graphQlOrganizationFlat()
   logger.info('fintOrganization - Created graph payload, sending request to FINT - flat')
   const { data } = await fintGraph(payload)
-  const raw = JSON.parse(JSON.stringify(data)) // We modify data when repacking, create a simple copy here
   if (!data.organisasjonselement?.organisasjonsId?.identifikatorverdi) {
     logger.info(`fintOrganization - No organization with organisasjonsId "${topUnitId}" found in FINT`)
     return null
   }
   logger.info('fintOrganization - Got response from FINT, repacking result - flat')
-  const flat = []
+  const flat = /** @type {any[]} */ ([])
   repackOrganizationFlat(data.organisasjonselement, flat, 0) // Modifies the object directly
   logger.info('fintOrganization - Repacked result - flat')
 
-  return { repacked: flat, raw }
+  return flat
 }
 
 export { fintOrganizationFlat, repackOrganizationFlat }

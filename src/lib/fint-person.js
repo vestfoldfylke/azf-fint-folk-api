@@ -60,7 +60,7 @@ const fintPerson = async (fodselsnummer) => {
   }
   logger.info('fintPerson - Got response from FINT, repacking result {fodselsnummer}', fodselsnummer)
   const repacked = repackPerson(data)
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fintPerson, repackPerson }

@@ -126,7 +126,7 @@ const fintOrganization = async (identifikator, identifikatorverdi) => {
   const repacked = repackOrganization(data)
   logger.info('fintOrganization - Repacked result {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
 
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fintOrganization, repackOrganization }

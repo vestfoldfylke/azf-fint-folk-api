@@ -13,11 +13,11 @@ const fixedOrganizationFlat = async () => {
   if (!topUnit) throw new Error(`No top unit with id ${topUnitId} found in fixedOrgNested`)
 
   logger.info('fixedOrganizationFlat - Got necessary data, repacking result - flat')
-  const flat = []
+  const flat = /** @type {any[]} */ ([])
   repackOrganizationFlat(topUnit, flat, 0, graphQlFlat)
   logger.info('fintOrganization - Repacked result - flat')
 
-  return { repacked: flat, raw: graphQlFlat }
+  return flat
 }
 
 export { fixedOrganizationFlat }

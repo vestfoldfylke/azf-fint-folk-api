@@ -147,7 +147,7 @@ const fintTeacher = async (feidenavn, includeStudentSsn) => {
       throw error
     }
   }
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fintTeacher, repackTeacher }

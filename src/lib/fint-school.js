@@ -104,7 +104,7 @@ const fintSchool = async (schoolNumber, includeStudentSsn) => {
   const repacked = repackSchool(data)
   logger.info('fintSchool - Repacked result - returning {schoolNumber} {includeStudentSsn}', schoolNumber, includeStudentSsn)
 
-  return { repacked, raw: data }
+  return repacked
 }
 
 export { fintSchool, repackSchool }

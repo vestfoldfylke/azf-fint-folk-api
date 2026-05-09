@@ -16,7 +16,7 @@ const fixedOrganizationStructure = async (includeInactiveUnits) => {
   const repacked = repackOrganizationStructure(topUnit, includeInactiveUnits, graphQlFlat)
   logger.info('fixedOrganizationStructure - Repacked result - structure')
 
-  return { repacked, raw: graphQlFlat }
+  return repacked
 }
 
 export { fixedOrganizationStructure }
