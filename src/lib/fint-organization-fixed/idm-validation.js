@@ -150,11 +150,9 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
         : "fail"
 
     // OrganisasjonsId
-    validationResult.tests.missingOrganisasjonsId.data = enheter.filter(
-      (enhet) => !enhet.organisasjonsId || !enhet.organisasjonsId.identifikatorverdi || enhet.organisasjonsId.identifikatorverdi.length === 0
-    ) // Sjekk hvor mange tomme det er
+    validationResult.tests.missingOrganisasjonsId.data = enheter.filter((enhet) => !enhet.organisasjonsId?.identifikatorverdi || enhet.organisasjonsId.identifikatorverdi.length === 0) // Sjekk hvor mange tomme det er
     validationResult.tests.missingOrganisasjonsId.status = validationResult.tests.missingOrganisasjonsId.data.length < 10 ? "pass" : "fail"
-    enheter = enheter.filter((enhet) => enhet.organisasjonsId && enhet.organisasjonsId.identifikatorverdi && enhet.organisasjonsId.identifikatorverdi.length > 0) // Fjern de som ikke har organisasjonsId
+    enheter = enheter.filter((enhet) => enhet.organisasjonsId?.identifikatorverdi && enhet.organisasjonsId.identifikatorverdi.length > 0) // Fjern de som ikke har organisasjonsId
 
     // Abstract units with arbeidsforhold
     validationResult.tests.abstractWithArbeidsforhold.data = enheter.filter(
@@ -248,12 +246,16 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
         try {
           const childUnit = getUnitFromLink(childLink, enheter)
           const parentLink = childUnit._links.overordnet[0].href
-          if (parentLink !== checkUnit.selfLink.href) checkUnit.brokenChildLinks.push(childLink)
+          if (parentLink !== checkUnit.selfLink.href) {
+            checkUnit.brokenChildLinks.push(childLink)
+          }
         } catch {
           checkUnit.brokenChildLinks.push(childLink) // Unique child not found
         }
       })
-      if (checkUnit.brokenChildLinks.length > 0) unitsWithBrokenChildRelations.push(checkUnit)
+      if (checkUnit.brokenChildLinks.length > 0) {
+        unitsWithBrokenChildRelations.push(checkUnit)
+      }
     })
     validationResult.tests.brokenChildRelation.data = unitsWithBrokenChildRelations
     validationResult.tests.brokenChildRelation.status = unitsWithBrokenChildRelations.length === 0 ? "pass" : "warn"
@@ -264,9 +266,11 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
       try {
         const parentUnit = getUnitFromLink(parentLink, enheter)
         const selfLink = enhet._links.self.find((link) => link.href.includes("organisasjonsid"))
-        if (selfLink.href === parentLink) return false // Parent is self (top-level)
+        if (selfLink.href === parentLink) {
+          return false // Parent is self (top-level)
+        }
         return !parentUnit._links.underordnet.some((link) => link.href === selfLink.href)
-      } catch (error) {
+      } catch (_error) {
         return true // Parent not found
       }
     })
@@ -293,7 +297,9 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
     // Check if we are happy
     validationResult.valid = Object.values(validationResult.tests).every((test) => test.status === "pass" || test.status === "warn")
 
-    if (validationResult.valid) validationResult.validUnits = enheter // Else it will be null, and stuff won't run in case someone tries to use it
+    if (validationResult.valid) {
+      validationResult.validUnits = enheter // Else it will be null, and stuff won't run in case someone tries to use it
+    }
     return validationResult
   } catch (error) {
     logger.error("Internal error when validating raw organization units {err}", error.stack || error.toString())
@@ -304,9 +310,15 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
 }
 
 const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
-  if (!exceptionRules) throw new Error('Missing required parameter "exceptionRules"')
-  if (!preValidatedUnits) throw new Error('Missing required parameter "preValidatedUnits"')
-  if (!Array.isArray(preValidatedUnits)) throw new Error('Parameter "preValidatedUnits" is not an array')
+  if (!exceptionRules) {
+    throw new Error('Missing required parameter "exceptionRules"')
+  }
+  if (!preValidatedUnits) {
+    throw new Error('Missing required parameter "preValidatedUnits"')
+  }
+  if (!Array.isArray(preValidatedUnits)) {
+    throw new Error('Parameter "preValidatedUnits" is not an array')
+  }
 
   let { overrideNextProbableLink, useAbstractAsUnitOverride, nameChainOverride, absorbChildrenOverrides, manualLeaders } = exceptionRules
   const validationResult = {
@@ -316,40 +328,59 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
   }
 
   const verifyBaseFormat = (key, value) => {
-    if (!key || !value) throw new Error("Missing required parameters (key, value) rule cannot be verified")
-    if (!hasCorrectOrganisasjonsIdFormat(key)) return { verified: false, message: `Nøkkel ${key} er ikke på format "x-x-x", sett opp regelen korrekt...` }
-    if (!value.navn) return { verified: false, message: 'Regel mangler "navn"-property, sett opp regelen korrekt...' }
+    if (!key || !value) {
+      throw new Error("Missing required parameters (key, value) rule cannot be verified")
+    }
+    if (!hasCorrectOrganisasjonsIdFormat(key)) {
+      return { verified: false, message: `Nøkkel ${key} er ikke på format "x-x-x", sett opp regelen korrekt...` }
+    }
+    if (!value.navn) {
+      return { verified: false, message: 'Regel mangler "navn"-property, sett opp regelen korrekt...' }
+    }
     const matchingUnit = preValidatedUnits.find((unit) => unit.organisasjonsId.identifikatorverdi === key)
-    if (!matchingUnit) return { verified: false, message: `Ingen tilsvarende enhet funnet for organisasjonsId "${key}" i FINT - enten feil id eller HR har endret noe...` }
-    if (matchingUnit.navn !== value.navn)
+    if (!matchingUnit) {
+      return { verified: false, message: `Ingen tilsvarende enhet funnet for organisasjonsId "${key}" i FINT - enten feil id eller HR har endret noe...` }
+    }
+    if (matchingUnit.navn !== value.navn) {
       return {
         verified: false,
         message: `Navn i regel "${value.navn}" matcher ikke navn i FINT: "${matchingUnit.navn}" for organisasjonsId "${key}" - enten feil navn i regel eller HR har endret noe...`
       }
+    }
     return { verified: true, matchingUnit }
   }
   const verifyLink = (link) => {
-    if (!link) throw new Error('Missing required parameter "link" for verifyLinkFormat')
-    if (!link.href) return { verified: false, message: `Mangler href-property i link ${link}, sett opp regelen korrekt...` }
-    if (!link.navn) return { verified: false, message: `Mangler navn-property i link ${link}, sett opp regelen korrekt...` }
-    if (!link.href.startsWith(`${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/`))
+    if (!link) {
+      throw new Error('Missing required parameter "link" for verifyLinkFormat')
+    }
+    if (!link.href) {
+      return { verified: false, message: `Mangler href-property i link ${link}, sett opp regelen korrekt...` }
+    }
+    if (!link.navn) {
+      return { verified: false, message: `Mangler navn-property i link ${link}, sett opp regelen korrekt...` }
+    }
+    if (!link.href.startsWith(`${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/`)) {
       return { verified: false, message: `href-property i link ${link.href} starter ikke med "${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/" - sett opp regelen korrekt` }
+    }
     let matchingLinkUnit
     try {
       matchingLinkUnit = getUnitFromLink(link.href, preValidatedUnits)
-    } catch (error) {
+    } catch (_error) {
       return { verified: false, message: `Ingen unik enhet funnet i FINT for link ${link.href} - enten feil id eller HR har endret noe...` }
     }
-    if (matchingLinkUnit.navn !== link.navn)
+    if (matchingLinkUnit.navn !== link.navn) {
       return {
         verified: false,
         message: `Navn i lenke fra regel "${link.navn}" matcher ikke navn i FINT: "${matchingLinkUnit.navn}" for link ${link.href} - enten feil navn i regel eller HR har endret noe...`
       }
+    }
     return { verified: true, matchingLinkUnit }
   }
 
-  const generateInvalidRule = (exceptionRuleName, key, value, message) => {
-    if (!exceptionRuleName || !key || !message) throw new Error("Missing required parameters (exceptionRuleName, key, value, message) for generateInvalidRule")
+  const generateInvalidRule = (exceptionRuleName, key, _value, message) => {
+    if (!exceptionRuleName || !key || !message) {
+      throw new Error("Missing required parameters (exceptionRuleName, key, value, message) for generateInvalidRule")
+    }
     return {
       exceptionRule: exceptionRuleName,
       key,
@@ -365,7 +396,9 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
       validationResult.invalidRules.push(invalidRule)
     }
     // Check that all override exceptions are set up correctly
-    if (!overrideNextProbableLink) overrideNextProbableLink = {}
+    if (!overrideNextProbableLink) {
+      overrideNextProbableLink = {}
+    }
     let exceptionRuleName = "overrideNextProbableLink"
     for (const [key, value] of Object.entries(overrideNextProbableLink)) {
       const baseFormatVerified = verifyBaseFormat(key, value)
@@ -397,7 +430,9 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
       }
     }
     // Check that all useAbstractAsUnitOverride exceptions are set up correctly
-    if (!useAbstractAsUnitOverride) useAbstractAsUnitOverride = {}
+    if (!useAbstractAsUnitOverride) {
+      useAbstractAsUnitOverride = {}
+    }
     exceptionRuleName = "useAbstractAsUnitOverride"
     for (const [key, value] of Object.entries(useAbstractAsUnitOverride)) {
       const baseFormatVerified = verifyBaseFormat(key, value)
@@ -407,7 +442,9 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
       }
     }
     // Check that all nameChainOverride exceptions are set up correctly
-    if (!nameChainOverride) nameChainOverride = {}
+    if (!nameChainOverride) {
+      nameChainOverride = {}
+    }
     exceptionRuleName = "nameChainOverride"
     for (const [key, value] of Object.entries(nameChainOverride)) {
       const baseFormatVerified = verifyBaseFormat(key, value)
@@ -422,7 +459,9 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
       }
     }
     // Check that all absorbChildren exceptions are set up correctly
-    if (!absorbChildrenOverrides) absorbChildrenOverrides = {}
+    if (!absorbChildrenOverrides) {
+      absorbChildrenOverrides = {}
+    }
     exceptionRuleName = "absorbChildrenOverrides"
     for (const [key, value] of Object.entries(absorbChildrenOverrides)) {
       const baseFormatVerified = verifyBaseFormat(key, value)
@@ -457,7 +496,9 @@ const validateExceptionRules = (exceptionRules, preValidatedUnits) => {
       }
     }
     // Check that all manualLeaders exceptions are set up correctly
-    if (!manualLeaders) manualLeaders = {}
+    if (!manualLeaders) {
+      manualLeaders = {}
+    }
     exceptionRuleName = "manualLeaders"
     for (const [key, value] of Object.entries(manualLeaders)) {
       const baseFormatVerified = verifyBaseFormat(key, value)

@@ -25,9 +25,11 @@ import { logger } from "@vestfoldfylke/loglady"
  * @returns {boolean}
  */
 const isValidDate = (dateString) => {
-  if (!dateString) return false
+  if (!dateString) {
+    return false
+  }
   const date = new Date(dateString)
-  return !isNaN(date.getTime())
+  return !Number.isNaN(date.getTime())
 }
 
 /**
@@ -36,14 +38,24 @@ const isValidDate = (dateString) => {
  * @returns {boolean} - Om perioden er aktiv eller ikke
  */
 export const aktivPeriode = (periode) => {
-  if (!periode) return true // Hvis perioden ikke har data - anta den er aktiv
+  if (!periode) {
+    return true // Hvis perioden ikke har data - anta den er aktiv
+  }
   const now = new Date() // Akkurat nu
-  if (!periode.start || !isValidDate(periode.start)) return false // Hvis startdato ikke er gyldig får vi anta at det ikke er aktivt
+  if (!periode.start || !isValidDate(periode.start)) {
+    return false // Hvis startdato ikke er gyldig får vi anta at det ikke er aktivt
+  }
   if (now > new Date(periode.start)) {
     // Sjekk først om perioden er senere enn start
-    if (!periode.slutt) return true // Hvis ikke det finnes noen slutt er vi good
-    if (!isValidDate(periode.slutt)) return true // Hvis sluttdato ikke er gyldig får vi anta at vi er good
-    if (now < new Date(periode.slutt)) return true // Hvis sluttdato ikke er nådd enda er vi også good
+    if (!periode.slutt) {
+      return true // Hvis ikke det finnes noen slutt er vi good
+    }
+    if (!isValidDate(periode.slutt)) {
+      return true // Hvis sluttdato ikke er gyldig får vi anta at vi er good
+    }
+    if (now < new Date(periode.slutt)) {
+      return true // Hvis sluttdato ikke er nådd enda er vi også good
+    }
   }
   // Midlertidig for skoleterminer som er inaktive i en dag mellom terminene...
   return false // Hvis den perioden ikke har starta er den itj aktiv
@@ -78,8 +90,10 @@ export const repackPeriode = (periode) => {
   }
 }
 
-export const skoleElementIsAktiv = (skolear, termin) => {
-  if (!skolear.gyldighetsperiode.aktiv) return false
+export const skoleElementIsAktiv = (skolear, _termin) => {
+  if (!skolear.gyldighetsperiode.aktiv) {
+    return false
+  }
   // if (!termin.some(t => t.gyldighetsperiode.aktiv)) return false // Midlertidig fix (kanskje permanent - sjekk kun skoleåret - terminene overlapper ikke, de har en dag mellom hverandre som ikke er aktivt...)
   return true
 }
@@ -102,7 +116,9 @@ export const repackSkolear = (skolear) => {
 }
 
 export const repackSkole = (skole, hovedskole) => {
-  if (!skole) return null
+  if (!skole) {
+    return null
+  }
   return {
     navn: skole.navn,
     kortnavn: skole.organisasjon.kortnavn,
@@ -114,7 +130,9 @@ export const repackSkole = (skole, hovedskole) => {
 }
 
 export const repackMiniSkole = (miniSkole, hovedskole) => {
-  if (!miniSkole) return null
+  if (!miniSkole) {
+    return null
+  }
   return {
     navn: miniSkole.navn,
     skolenummer: miniSkole.skolenummer.identifikatorverdi,
@@ -141,8 +159,12 @@ export const repackNavn = (navn) => {
 }
 
 export const repackAdresselinje = (adresselinje) => {
-  if (!adresselinje) return null
-  if (adresselinje.length === 1) return adresselinje[0]
+  if (!adresselinje) {
+    return null
+  }
+  if (adresselinje.length === 1) {
+    return adresselinje[0]
+  }
   return adresselinje
     .filter((linje) => linje)
     .map((linje) => linje.trim())
@@ -150,7 +172,9 @@ export const repackAdresselinje = (adresselinje) => {
 }
 
 export const getAge = (fodselsdato) => {
-  if (!fodselsdato) return null
+  if (!fodselsdato) {
+    return null
+  }
   const today = new Date()
   const birthDate = new Date(fodselsdato)
   let age = today.getFullYear() - birthDate.getFullYear()
@@ -182,13 +206,19 @@ export const repackLeder = (leder) => {
 }
 
 export const createStruktur = (arbeidssted, fixedOrgFlat, graphQlFlat) => {
-  if ((fixedOrgFlat && !graphQlFlat) || (!fixedOrgFlat && graphQlFlat)) throw new Error("createStruktur must have either both topUnitNested or graphQlFlatUnits, or none")
+  if ((fixedOrgFlat && !graphQlFlat) || (!fixedOrgFlat && graphQlFlat)) {
+    throw new Error("createStruktur must have either both topUnitNested or graphQlFlatUnits, or none")
+  }
   if (fixedOrgFlat && graphQlFlat) {
     // If using fixedOrg structure
     const getOrgIdFromLink = (link) => {
-      if (!link?.href) throw new Error("No href in link")
+      if (!link?.href) {
+        throw new Error("No href in link")
+      }
       const orgId = link.href.split("/").pop()
-      if (!orgId) throw new Error("No orgId found in link")
+      if (!orgId) {
+        throw new Error("No orgId found in link")
+      }
       return orgId
     }
     const structureIds = []
@@ -199,17 +229,23 @@ export const createStruktur = (arbeidssted, fixedOrgFlat, graphQlFlat) => {
       )
       return []
     }
-    if (!current) throw new Error(`No unit with id ${arbeidssted.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
+    if (!current) {
+      throw new Error(`No unit with id ${arbeidssted.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
+    }
     structureIds.push(current.organisasjonsId.identifikatorverdi)
     while (getOrgIdFromLink(current._links?.overordnet[0]) !== current.organisasjonsId.identifikatorverdi) {
       const overordnetId = getOrgIdFromLink(current._links?.overordnet[0])
       current = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === overordnetId)
-      if (!current) throw new Error(`No overordnet unit with id ${overordnetId} found in fixedOrgFlat`)
+      if (!current) {
+        throw new Error(`No overordnet unit with id ${overordnetId} found in fixedOrgFlat`)
+      }
       structureIds.push(current.organisasjonsId.identifikatorverdi)
     }
     const structure = structureIds.map((id) => {
       const correspondingUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === id)
-      if (!correspondingUnit) throw new Error(`No corresponding unit with id ${id} found in graphQlFlat`)
+      if (!correspondingUnit) {
+        throw new Error(`No corresponding unit with id ${id} found in graphQlFlat`)
+      }
       return {
         kortnavn: correspondingUnit.kortnavn,
         navn: correspondingUnit.navn,
@@ -245,8 +281,12 @@ export const createStruktur = (arbeidssted, fixedOrgFlat, graphQlFlat) => {
 }
 
 export const getNarmesteLeder = (ansattnummer, strukturlinje) => {
-  if (!ansattnummer || typeof ansattnummer !== "string") throw new Error("No ansattnummer provided for getNarmesteLeder...")
-  if (!strukturlinje.some((enhet) => enhet.leder && enhet.leder.ansattnummer !== ansattnummer)) return null // Ingen ledere over her gitt... kanskje sette ordfører ellerno sjit
+  if (!ansattnummer || typeof ansattnummer !== "string") {
+    throw new Error("No ansattnummer provided for getNarmesteLeder...")
+  }
+  if (!strukturlinje.some((enhet) => enhet.leder && enhet.leder.ansattnummer !== ansattnummer)) {
+    return null // Ingen ledere over her gitt... kanskje sette ordfører ellerno sjit
+  }
   const correctLeaderUnit = strukturlinje.find((enhet) => enhet.leder && enhet.leder.ansattnummer !== ansattnummer) // Finn første enhet som har en leder, som ikke er den ansatte
   const narmesteLeder = correctLeaderUnit?.leder || null
   return narmesteLeder

@@ -2,7 +2,7 @@ import { logger } from "@vestfoldfylke/loglady"
 import { feidenavnDomain, teamsStatusAlertUrls } from "../../../config.js"
 import { fintOrganizationFixedIdm } from "./idm.js"
 
-const getDisplayData = (data, maxElements) => {
+const getDisplayData = (_data, _maxElements) => {
   // Møkk - adaptive card støtter bare 40 kb ellerno, så vi må drite i dataene her... henviser heller til validate endepunktet
   return null
   /*

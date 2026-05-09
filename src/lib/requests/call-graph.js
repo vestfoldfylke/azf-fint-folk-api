@@ -9,15 +9,19 @@ import graphToken from "./graph-token.js"
  * @returns {Promise<{[key: string]: any} | null>}
  */
 const callGraph = async (resourceQuery, advancedQuery = false) => {
-  if (!resourceQuery) throw new Error('Missing required parameter "resourceQuery"')
-  if (!resourceQuery.startsWith("/")) throw new Error('Parameter "resourceQuery" must start with "/"')
+  if (!resourceQuery) {
+    throw new Error('Missing required parameter "resourceQuery"')
+  }
+  if (!resourceQuery.startsWith("/")) {
+    throw new Error('Parameter "resourceQuery" must start with "/"')
+  }
 
   const accessToken = await graphToken()
 
   /** @type {Record<string, string>} */
   const headers = { Authorization: `Bearer ${accessToken}` }
   if (advancedQuery) {
-    headers["ConsistencyLevel"] = "eventual"
+    headers.ConsistencyLevel = "eventual"
   }
 
   const response = await fetch(`${graphUrl}${resourceQuery}`, { headers })
@@ -41,9 +45,13 @@ const callGraph = async (resourceQuery, advancedQuery = false) => {
  */
 export const getFeidenavn = async (upn) => {
   const data = await callGraph(`/users/${upn}?$select=onPremisesSamAccountName`)
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
-  if (!data.onPremisesSamAccountName) throw new Error(`Could not find onPremisesSamAccountName for "${upn}"`)
+  if (!data.onPremisesSamAccountName) {
+    throw new Error(`Could not find onPremisesSamAccountName for "${upn}"`)
+  }
   return `${data.onPremisesSamAccountName}${feidenavnDomain}`
 }
 
@@ -54,10 +62,16 @@ export const getFeidenavn = async (upn) => {
  */
 export const getAnsattnummer = async (upn) => {
   const data = await callGraph(`/users/${upn}?$select=onPremisesExtensionAttributes`)
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
-  if (!data.onPremisesExtensionAttributes) throw new Error(`Could not find onPremisesExtensionAttributes for "${upn}"`)
-  if (!data.onPremisesExtensionAttributes[employeeNumberExtenstionAttribute]) throw new Error(`Could not find onPremisesExtensionAttributes.${employeeNumberExtenstionAttribute} for "${upn}"`)
+  if (!data.onPremisesExtensionAttributes) {
+    throw new Error(`Could not find onPremisesExtensionAttributes for "${upn}"`)
+  }
+  if (!data.onPremisesExtensionAttributes[employeeNumberExtenstionAttribute]) {
+    throw new Error(`Could not find onPremisesExtensionAttributes.${employeeNumberExtenstionAttribute} for "${upn}"`)
+  }
   return data.onPremisesExtensionAttributes[employeeNumberExtenstionAttribute]
 }
 
@@ -80,7 +94,9 @@ export const getStudentFromFeidenavn = async (feidenavn) => {
   const upn = `${upnPrefix}${studentUpnSuffix}`
 
   const data = await callGraph(`/users/${upn}`)
-  if (!data) return null
+  if (!data) {
+    return null
+  }
 
   return data
 }

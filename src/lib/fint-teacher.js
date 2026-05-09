@@ -5,7 +5,9 @@ import { fintGraph } from "./requests/call-fint.js"
 import { getUserFromSamAccount } from "./requests/call-graph.js"
 
 const repackStudent = (elevforhold, contactTeacherGroups) => {
-  if (elevforhold.elevforhold) elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
+  if (elevforhold.elevforhold) {
+    elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
+  }
   const name = repackNavn(elevforhold.elev.person.navn)
   const repackedStudent = {
     navn: name.fulltnavn,
@@ -15,7 +17,9 @@ const repackStudent = (elevforhold, contactTeacherGroups) => {
     elevnummer: elevforhold.elev?.elevnummer?.identifikatorverdi || null,
     kontaktlarer: elevforhold.kontaktlarergruppe.some((group1) => contactTeacherGroups.some((group2) => group1.systemId.identifikatorverdi === group2.systemId))
   }
-  if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
+  if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) {
+    repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
+  }
   return repackedStudent
 }
 

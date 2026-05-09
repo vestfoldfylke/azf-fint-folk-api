@@ -35,7 +35,7 @@ export const httpTriggerMiddleware = async (request, context, authorizedRoles, h
         }
 
         updateContext({
-          prefix: `${logContext.prefix} - ${decoded.appid}${decoded.upn ? " - " + decoded.upn : ""}`
+          prefix: `${logContext.prefix} - ${decoded.appid}${decoded.upn ? ` - ${decoded.upn}` : ""}`
         })
 
         logger.info(`Token decoded, checking roles`)

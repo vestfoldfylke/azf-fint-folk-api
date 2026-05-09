@@ -12,7 +12,9 @@ import getFintToken from "./fint-token.js"
  * @returns {Promise<FintGraphResponse>} result of request
  */
 export const fintGraph = async (payload) => {
-  if (!payload) throw new Error('Missing required parameter "payload"')
+  if (!payload) {
+    throw new Error('Missing required parameter "payload"')
+  }
   const token = await getFintToken()
 
   const response = await fetch(`${fint.url}/graphql/graphql`, {
@@ -38,8 +40,9 @@ export const fintGraph = async (payload) => {
       return fintResponseData
     }
   }
-  if (fintResponseData.errors && fintResponseData.errors.length > 0)
+  if (fintResponseData.errors && fintResponseData.errors.length > 0) {
     throw new Error(typeof fintResponseData.errors === "object" ? JSON.stringify(fintResponseData.errors, null, 2) : fintResponseData.errors.toString())
+  }
   return fintResponseData
 }
 
@@ -48,7 +51,9 @@ export const fintGraph = async (payload) => {
  * @returns {Promise<{[key: string]: any}>} result of request
  */
 export const fintRest = async (resource) => {
-  if (!resource) throw new Error('Missing required parameter "resource"')
+  if (!resource) {
+    throw new Error('Missing required parameter "resource"')
+  }
   const token = await getFintToken()
 
   const response = await fetch(`${fint.url}/${resource}`, {

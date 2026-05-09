@@ -4,7 +4,9 @@ import { repackAdresselinje, repackLeder, repackNavn, repackPeriode } from "./he
 import { fintGraph } from "./requests/call-fint.js"
 
 const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
-  if ((!fixedOrgFlat && graphQlFlat) || (fixedOrgFlat && !graphQlFlat)) throw new Error("fixedOrgFlat and grahQlFlat must be either both set or both not set")
+  if ((!fixedOrgFlat && graphQlFlat) || (fixedOrgFlat && !graphQlFlat)) {
+    throw new Error("fixedOrgFlat and grahQlFlat must be either both set or both not set")
+  }
 
   const gyldighetsperiode = repackPeriode(fintOrganization.organisasjonselement.gyldighetsperiode)
   let overordnet = null
@@ -12,14 +14,20 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
     let overordnetData = null
     if (fixedOrgFlat && graphQlFlat) {
       const correspondingFixedOrgUnit = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
-      if (!correspondingFixedOrgUnit) throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
-      if (!correspondingFixedOrgUnit._links.overordnet || correspondingFixedOrgUnit._links.overordnet.length === 0)
+      if (!correspondingFixedOrgUnit) {
+        throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
+      }
+      if (!correspondingFixedOrgUnit._links.overordnet || correspondingFixedOrgUnit._links.overordnet.length === 0) {
         throw new Error(`No overordnet link found in corresponding unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      }
       const fixedOrgOverordnetId = correspondingFixedOrgUnit._links.overordnet[0].href.split("/").pop()
-      if (!fixedOrgOverordnetId)
+      if (!fixedOrgOverordnetId) {
         throw new Error(`No overordnet id found in overordnet href for unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      }
       const correspondingGraphQlUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fixedOrgOverordnetId)
-      if (!correspondingGraphQlUnit) throw new Error(`No corresponding unit with id ${fixedOrgOverordnetId} found in graphQlFlat`)
+      if (!correspondingGraphQlUnit) {
+        throw new Error(`No corresponding unit with id ${fixedOrgOverordnetId} found in graphQlFlat`)
+      }
       overordnetData = correspondingGraphQlUnit
     } else {
       overordnetData = fintOrganization.organisasjonselement.overordnet
@@ -68,14 +76,22 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
   let underordnetToHandle = []
   if (fixedOrgFlat && graphQlFlat) {
     const correspondingFixedOrgUnit = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
-    if (!correspondingFixedOrgUnit) throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
+    if (!correspondingFixedOrgUnit) {
+      throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
+    }
     const fixedOrgUnderordnetLinks = correspondingFixedOrgUnit._links.underordnet || []
     for (const link of fixedOrgUnderordnetLinks) {
-      if (!link.href) throw new Error("No href in underordnet link")
+      if (!link.href) {
+        throw new Error("No href in underordnet link")
+      }
       const underordnetId = link.href.split("/").pop()
-      if (!underordnetId) throw new Error(`No underordnet id found in underordnet href for unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      if (!underordnetId) {
+        throw new Error(`No underordnet id found in underordnet href for unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      }
       const correspondingGraphQlUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === underordnetId)
-      if (!correspondingGraphQlUnit) throw new Error(`No corresponding unit with id ${underordnetId} found in graphQlFlat`)
+      if (!correspondingGraphQlUnit) {
+        throw new Error(`No corresponding unit with id ${underordnetId} found in graphQlFlat`)
+      }
       underordnetToHandle.push(correspondingGraphQlUnit)
     }
   } else {

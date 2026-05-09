@@ -32,7 +32,7 @@ export default async (forceNew = false) => {
 
   const token = await cca.acquireTokenByClientCredential(clientCredentials)
 
-  if (!token || !token.accessToken) {
+  if (!token?.accessToken) {
     throw new Error("Failed to acquire token from Microsoft")
   }
 
@@ -40,7 +40,7 @@ export default async (forceNew = false) => {
     throw new Error('Token response is missing "expiresOn" property')
   }
 
-  const expires = Math.floor((token.expiresOn.getTime() - new Date().getTime()) / 1000)
+  const expires = Math.floor((token.expiresOn.getTime() - Date.now()) / 1000)
   logger.info(`getGraphToken - Got token from Microsoft, expires in ${expires} seconds.`)
   tokenCache.set(cacheKey, `${token.accessToken}==`, expires) // Haha, just to make the cached token not directly usable
   logger.info("getGraphToken - Token stored in cache")

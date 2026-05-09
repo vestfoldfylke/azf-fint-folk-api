@@ -37,7 +37,7 @@ export const decodeAccessToken = (token) => {
   let decoded
   try {
     decoded = decodeJwt(token)
-  } catch (error) {
+  } catch (_error) {
     result.msg = "Token is not a valid jwt"
     return result
   }

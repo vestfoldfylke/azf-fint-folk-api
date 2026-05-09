@@ -5,7 +5,9 @@ import { fintGraph } from "./requests/call-fint.js"
 import { getStudentFromFeidenavn } from "./requests/call-graph.js"
 
 const repackTeacher = (undervisningsforhold, contactTeachers) => {
-  if (undervisningsforhold.undervisningsforhold) undervisningsforhold = undervisningsforhold.undervisningsforhold // I gruppemedlemskap ligger undervisningsforholdet inne i en prop som heter undervisningsforhold...
+  if (undervisningsforhold.undervisningsforhold) {
+    undervisningsforhold = undervisningsforhold.undervisningsforhold // I gruppemedlemskap ligger undervisningsforholdet inne i en prop som heter undervisningsforhold...
+  }
   const name = repackNavn(undervisningsforhold.skoleressurs?.personalressurs?.person?.navn)
   return {
     feidenavn: undervisningsforhold.skoleressurs?.feidenavn?.identifikatorverdi || null,
@@ -19,7 +21,9 @@ const repackTeacher = (undervisningsforhold, contactTeachers) => {
 }
 
 const repackStudent = (fintStudent) => {
-  if (fintStudent.person) fintStudent = fintStudent.person // Searched by fnr, simply go a step in to use the same functionality as for feidenavn
+  if (fintStudent.person) {
+    fintStudent = fintStudent.person // Searched by fnr, simply go a step in to use the same functionality as for feidenavn
+  }
   const name = repackNavn(fintStudent.elev.person.navn)
   const hovedskoleElevforhold = fintStudent.elev.elevforhold.find((f) => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
   const student = {
@@ -194,7 +198,9 @@ const fintStudent = async (feidenavn, elevnummer) => {
       logger.error("fintStudent - Failed when getting user from AzureAd. Cannot populate entra values", error.toString())
     }
   }
-  if (!repacked.upn) repacked.upn = null // If no upn was found, set it to null
+  if (!repacked.upn) {
+    repacked.upn = null // If no upn was found, set it to null
+  }
 
   return repacked
 }

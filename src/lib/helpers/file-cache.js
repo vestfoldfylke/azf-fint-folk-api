@@ -42,7 +42,7 @@ export class FileCache {
 
   set(cacheKey, data, ttl) {
     try {
-      if (typeof ttl !== "number" || isNaN(ttl) || ttl <= 0) {
+      if (typeof ttl !== "number" || Number.isNaN(ttl) || ttl <= 0) {
         throw new Error("TTL (time-to-live) must be a positive number")
       }
       const expiry = new Date(Date.now() + ttl * 1000).toISOString()

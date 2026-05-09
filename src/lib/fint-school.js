@@ -4,7 +4,9 @@ import { repackAdresselinje, repackNavn, repackSkolear, repackTermin, skoleEleme
 import { fintGraph } from "./requests/call-fint.js"
 
 const repackStudent = (elevforhold) => {
-  if (elevforhold.elevforhold) elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
+  if (elevforhold.elevforhold) {
+    elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
+  }
   const name = repackNavn(elevforhold.elev.person.navn)
   const repackedStudent = {
     navn: name.fulltnavn,
@@ -15,7 +17,9 @@ const repackStudent = (elevforhold) => {
     elevforholdId: elevforhold.systemId.identifikatorverdi,
     hovedskole: elevforhold.hovedskole === true || false
   }
-  if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
+  if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) {
+    repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
+  }
   return repackedStudent
 }
 
@@ -72,7 +76,9 @@ const repackSchool = (fintSchool) => {
     })
   }
 
-  if (!fintSchool.skole.undervisningsgruppe) return school
+  if (!fintSchool.skole.undervisningsgruppe) {
+    return school
+  }
   school.undervisningsgrupper = []
   for (const gruppe of fintSchool.skole.undervisningsgruppe) {
     const termin = repackTermin(gruppe.termin)

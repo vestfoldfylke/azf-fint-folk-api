@@ -11,7 +11,9 @@ import { getAditroOrgUnits, getAditroProjectDimension6Hours } from "./aditro-uni
 const vgsNameChain = (nameChain) => {
   const vgsSuffixes = ["vgs", "videregående skole", "videregåande skule"]
   const firstUnitNameVgsSuffix = vgsSuffixes.find((suffix) => nameChain[0].toLowerCase().endsWith(suffix))
-  if (!firstUnitNameVgsSuffix) return false
+  if (!firstUnitNameVgsSuffix) {
+    return false
+  }
   const schoolName = nameChain[0].substring(0, nameChain[0].length - firstUnitNameVgsSuffix.length).trim()
   return nameChain.every((name) => name.toLowerCase().startsWith(schoolName.toLowerCase()) && vgsSuffixes.some((suffix) => name.toLowerCase().endsWith(suffix)))
 }
@@ -25,10 +27,18 @@ const vgsNameChain = (nameChain) => {
  * @returns
  */
 const repackFintIdmEnheter = (topUnits, validatedUnits, aditroUnits, exceptionRules) => {
-  if (!Array.isArray(topUnits)) throw new Error("topUnits is not an array")
-  if (!Array.isArray(validatedUnits)) throw new Error("validatedUnits is not an array")
-  if (!(aditroUnits instanceof Map)) throw new Error("aditroUnits is not a Map")
-  if (typeof exceptionRules !== "object") throw new Error("exceptionRules is not an object")
+  if (!Array.isArray(topUnits)) {
+    throw new Error("topUnits is not an array")
+  }
+  if (!Array.isArray(validatedUnits)) {
+    throw new Error("validatedUnits is not an array")
+  }
+  if (!(aditroUnits instanceof Map)) {
+    throw new Error("aditroUnits is not a Map")
+  }
+  if (typeof exceptionRules !== "object") {
+    throw new Error("exceptionRules is not an object")
+  }
   const { absorbChildrenOverrides, useAbstractAsUnitOverride, nameChainOverride, overrideNextProbableLink, manualLeaders } = exceptionRules // Desctructure for easier access
   const handledUnits = []
   const resultingUnitsFlat = []
@@ -88,7 +98,7 @@ const repackFintIdmEnheter = (topUnits, validatedUnits, aditroUnits, exceptionRu
   }
 
   const willBeAbsorbedBy = (unit) => {
-    return Object.entries(absorbChildrenOverrides).find(([key, value]) =>
+    return Object.entries(absorbChildrenOverrides).find(([_key, value]) =>
       value.absorbChildren.some((child) => child.href === unit._links.self.find((link) => link.href.includes("organisasjonsid")).href)
     )
   }
@@ -333,7 +343,9 @@ const repackFintIdmEnheter = (topUnits, validatedUnits, aditroUnits, exceptionRu
     // Check if any exception rules were not triggered
     for (const ruleType in exceptionRules) {
       for (const ruleUnit in exceptionRules[ruleType]) {
-        if (validation.handledByExceptionRules.some((handledRule) => handledRule.rule === ruleType && handledRule.data.organisasjonsId === ruleUnit)) continue
+        if (validation.handledByExceptionRules.some((handledRule) => handledRule.rule === ruleType && handledRule.data.organisasjonsId === ruleUnit)) {
+          continue
+        }
         validation.tests.notTriggeredExceptionRules.data.push({ ruleType, ruleUnit })
       }
     }
@@ -376,15 +388,23 @@ const fintOrganizationFixedIdm = async () => {
   logger.info("fintOrganizationFixed - Fetching all organisasjonselementer from FINT")
   const fintResult = await fintRest("/administrasjon/organisasjon/organisasjonselement")
   const enheter = fintResult?._embedded?._entries
-  if (!enheter) throw new Error('Response from FINT did not contain "embedded._entries", something went wrong from FINT')
-  if (!Array.isArray(enheter)) throw new Error('"embedded._entries" in response from FINT was not array. Something went wrong from FINT')
+  if (!enheter) {
+    throw new Error('Response from FINT did not contain "embedded._entries", something went wrong from FINT')
+  }
+  if (!Array.isArray(enheter)) {
+    throw new Error('"embedded._entries" in response from FINT was not array. Something went wrong from FINT')
+  }
 
   const rawValidationResult = validateRawOrganizationUnits(enheter)
-  if (!rawValidationResult.valid) return { rawValidationResult }
+  if (!rawValidationResult.valid) {
+    return { rawValidationResult }
+  }
 
   const exceptionRules = getExceptionRules()
   const exceptionRuleValidationResult = validateExceptionRules(exceptionRules, rawValidationResult.validUnits)
-  if (!exceptionRuleValidationResult.valid) return { rawValidationResult, exceptionRuleValidationResult }
+  if (!exceptionRuleValidationResult.valid) {
+    return { rawValidationResult, exceptionRuleValidationResult }
+  }
 
   // Then we fetch aditroUnits as well, to be able to expand FINT units with organisasjonsType (which is not avaiable from FINT)
   const aditroUnits = await getAditroOrgUnits()
