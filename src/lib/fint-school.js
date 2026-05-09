@@ -1,7 +1,7 @@
-import graphQlSchool from '../fint-templates/school.js'
-import { skoleElementIsAktiv, repackNavn, repackSkolear, repackTermin, repackAdresselinje } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlSchool from "../fint-templates/school.js"
+import { repackAdresselinje, repackNavn, repackSkolear, repackTermin, skoleElementIsAktiv } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
 
 const repackStudent = (elevforhold) => {
   if (elevforhold.elevforhold) elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
@@ -44,7 +44,7 @@ const repackSchool = (fintSchool) => {
         navn: fintSchool.skole.organisasjon?.leder?.person?.navn ? repackNavn(fintSchool.skole.organisasjon?.leder?.person.navn) : null
       }
     },
-    elever: fintSchool.skole.elevforhold.map(elev => repackStudent(elev)),
+    elever: fintSchool.skole.elevforhold.map((elev) => repackStudent(elev)),
     basisgrupper: []
   }
   for (const gruppe of fintSchool.skole.basisgruppe) {
@@ -57,13 +57,18 @@ const repackSchool = (fintSchool) => {
       trinn: gruppe.trinn.navn,
       termin,
       skolear,
-      elever: gruppe.gruppemedlemskap.map(medlemskap => school.elever.find(elev => elev.elevforholdId === medlemskap.elevforhold?.systemId.identifikatorverdi) || { elevforholdId: medlemskap.elevforhold?.systemId.identifikatorverdi }).filter(elev => {
-        if (!elev.navn) {
-          logger.warn(`elev not found for elevforholdId ${elev.elevforholdId}`)
-          return false
-        }
-        return true
-      })
+      elever: gruppe.gruppemedlemskap
+        .map(
+          (medlemskap) =>
+            school.elever.find((elev) => elev.elevforholdId === medlemskap.elevforhold?.systemId.identifikatorverdi) || { elevforholdId: medlemskap.elevforhold?.systemId.identifikatorverdi }
+        )
+        .filter((elev) => {
+          if (!elev.navn) {
+            logger.warn(`elev not found for elevforholdId ${elev.elevforholdId}`)
+            return false
+          }
+          return true
+        })
     })
   }
 
@@ -79,30 +84,32 @@ const repackSchool = (fintSchool) => {
       fag: gruppe.fag,
       termin,
       skolear,
-      elever: gruppe.elevforhold.map(forhold => school.elever.find(elev => elev.elevforholdId === forhold?.systemId.identifikatorverdi) || { elevforholdId: forhold.systemId.identifikatorverdi }).filter(elev => {
-        if (!elev.navn) {
-          logger.warn(`elev not found for elevforholdId ${elev.elevforholdId}`)
-          return false
-        }
-        return true
-      })
+      elever: gruppe.elevforhold
+        .map((forhold) => school.elever.find((elev) => elev.elevforholdId === forhold?.systemId.identifikatorverdi) || { elevforholdId: forhold.systemId.identifikatorverdi })
+        .filter((elev) => {
+          if (!elev.navn) {
+            logger.warn(`elev not found for elevforholdId ${elev.elevforholdId}`)
+            return false
+          }
+          return true
+        })
     })
   }
   return school
 }
 
 const fintSchool = async (schoolNumber, includeStudentSsn) => {
-  logger.info('fintSchool - Creating graph payload {schoolNumber} {includeStudentSsn}', schoolNumber, includeStudentSsn)
+  logger.info("fintSchool - Creating graph payload {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
   const payload = graphQlSchool(schoolNumber, includeStudentSsn)
-  logger.info('fintSchool - Created graph payload, sending request to FINT {schoolNumber} {includeStudentSsn}', schoolNumber, includeStudentSsn)
+  logger.info("fintSchool - Created graph payload, sending request to FINT {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
   const { data } = await fintGraph(payload)
   if (!data.skole?.navn) {
     logger.info(`fintSchool - No school with schoolNumber "${schoolNumber}" found in FINT`)
     return null
   }
-  logger.info('Got response from FINT, repacking result {schoolNumber}', schoolNumber)
+  logger.info("Got response from FINT, repacking result {schoolNumber}", schoolNumber)
   const repacked = repackSchool(data)
-  logger.info('fintSchool - Repacked result - returning {schoolNumber} {includeStudentSsn}', schoolNumber, includeStudentSsn)
+  logger.info("fintSchool - Repacked result - returning {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
 
   return repacked
 }

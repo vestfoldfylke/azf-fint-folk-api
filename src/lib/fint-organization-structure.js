@@ -1,8 +1,8 @@
-import graphQlOrganizationStructure from '../fint-templates/organization-structure.js'
-import { repackLeder, repackPeriode } from './helpers/repack-fint.js'
-import { topUnitId } from '../../config.js'
-import { fintGraph } from './requests/call-fint.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import { topUnitId } from "../../config.js"
+import graphQlOrganizationStructure from "../fint-templates/organization-structure.js"
+import { repackLeder, repackPeriode } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
 
 const repackOrganizationStructure = (inputUnit, includeInactiveUnits, graphQlFlatUnits) => {
   // Sjekker om vi har slengt med graphQlFlatUnits - da bruker vi dataene fra den i stedet for fra input-unit
@@ -10,8 +10,10 @@ const repackOrganizationStructure = (inputUnit, includeInactiveUnits, graphQlFla
   if (!graphQlFlatUnits) {
     unit = JSON.parse(JSON.stringify(inputUnit))
   } else {
-    const unitData = graphQlFlatUnits.find(graphQlUnit => graphQlUnit.organisasjonsId.identifikatorverdi === inputUnit.organisasjonsId.identifikatorverdi)
-    if (!unitData) throw new Error(`No corresponding unit with id ${inputUnit.organisasjonsId.identifikatorverdi} found in graphQlFlatUnits`)
+    const unitData = graphQlFlatUnits.find((graphQlUnit) => graphQlUnit.organisasjonsId.identifikatorverdi === inputUnit.organisasjonsId.identifikatorverdi)
+    if (!unitData) {
+      throw new Error(`No corresponding unit with id ${inputUnit.organisasjonsId.identifikatorverdi} found in graphQlFlatUnits`)
+    }
     unit = JSON.parse(JSON.stringify(unitData))
   }
   delete unit.overordnet
@@ -23,26 +25,31 @@ const repackOrganizationStructure = (inputUnit, includeInactiveUnits, graphQlFla
   unit.gyldighetsperiode = gyldighetsperiode
   unit.leder = repackLeder(unit.leder)
 
-  if (!Array.isArray(unit.underordnet)) unit.underordnet = []
+  if (!Array.isArray(unit.underordnet)) {
+    unit.underordnet = []
+  }
+
   // Må sjekke om underordnet inneholder current unit of filtrere den vekk, fordi det er noe rart i FINT, som gjør at noen enheter er underordnet seg selv, og vil sende oss i evig loop om vi fortsetter...
-  unit.underordnet = inputUnit.underordnet.filter(u => u.organisasjonsId.identifikatorverdi !== unit.organisasjonsId)
-  unit.underordnet = unit.underordnet.map(u => repackOrganizationStructure(u, includeInactiveUnits, graphQlFlatUnits))
-  if (!includeInactiveUnits) unit.underordnet = unit.underordnet.filter(u => u.aktiv) // Expensive, because am idiot
+  unit.underordnet = inputUnit.underordnet.filter((u) => u.organisasjonsId.identifikatorverdi !== unit.organisasjonsId)
+  unit.underordnet = unit.underordnet.map((u) => repackOrganizationStructure(u, includeInactiveUnits, graphQlFlatUnits))
+  if (!includeInactiveUnits) {
+    unit.underordnet = unit.underordnet.filter((u) => u.aktiv) // Expensive, because am idiot
+  }
   return unit // Return to make sure the recursive function finishes before return
 }
 
 const fintOrganizationStructure = async (includeInactiveUnits) => {
-  logger.info('fintOrganization - Creating graph payload - structure')
+  logger.info("fintOrganization - Creating graph payload - structure")
   const payload = graphQlOrganizationStructure()
-  logger.info('fintOrganization - Created graph payload, sending request to FINT - structure')
+  logger.info("fintOrganization - Created graph payload, sending request to FINT - structure")
   const { data } = await fintGraph(payload)
   if (!data.organisasjonselement?.organisasjonsId?.identifikatorverdi) {
     logger.info(`fintOrganization - No organization with organisasjonsId "${topUnitId}" found in FINT`)
     return null
   }
-  logger.info('fintOrganization - Got response from FINT, repacking result - structure')
+  logger.info("fintOrganization - Got response from FINT, repacking result - structure")
   const repacked = repackOrganizationStructure(data.organisasjonselement, includeInactiveUnits) // Modifies the object directly, but we return object in question because js, and easier to understand
-  logger.info('fintOrganization - Repacked result - structure')
+  logger.info("fintOrganization - Repacked result - structure")
 
   return repacked
 }

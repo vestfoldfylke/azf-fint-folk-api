@@ -1,6 +1,6 @@
 // @ts-check
 
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
 
 /**
  * @typedef {Object} FintPeriode
@@ -39,7 +39,8 @@ export const aktivPeriode = (periode) => {
   if (!periode) return true // Hvis perioden ikke har data - anta den er aktiv
   const now = new Date() // Akkurat nu
   if (!periode.start || !isValidDate(periode.start)) return false // Hvis startdato ikke er gyldig får vi anta at det ikke er aktivt
-  if (now > new Date(periode.start)) { // Sjekk først om perioden er senere enn start
+  if (now > new Date(periode.start)) {
+    // Sjekk først om perioden er senere enn start
     if (!periode.slutt) return true // Hvis ikke det finnes noen slutt er vi good
     if (!isValidDate(periode.slutt)) return true // Hvis sluttdato ikke er gyldig får vi anta at vi er good
     if (now < new Date(periode.slutt)) return true // Hvis sluttdato ikke er nådd enda er vi også good
@@ -84,7 +85,7 @@ export const skoleElementIsAktiv = (skolear, termin) => {
 }
 
 export const repackTermin = (termin) => {
-  return termin.map(t => {
+  return termin.map((t) => {
     const gyldighetsperiode = repackPeriode(t.gyldighetsperiode)
     return {
       ...t,
@@ -129,7 +130,7 @@ export const repackNavn = (navn) => {
       etternavn: null
     }
   }
-  const mellomnavn = navn.mellomnavn && `${navn.mellomnavn.trim()}` ? ` ${navn.mellomnavn.trim()}` : ''
+  const mellomnavn = navn.mellomnavn && `${navn.mellomnavn.trim()}` ? ` ${navn.mellomnavn.trim()}` : ""
   const fornavn = `${navn.fornavn}${mellomnavn}`
   const fulltnavn = `${fornavn} ${navn.etternavn}`
   return {
@@ -142,7 +143,10 @@ export const repackNavn = (navn) => {
 export const repackAdresselinje = (adresselinje) => {
   if (!adresselinje) return null
   if (adresselinje.length === 1) return adresselinje[0]
-  return adresselinje.filter(linje => linje).map(linje => linje.trim()).join(', ')
+  return adresselinje
+    .filter((linje) => linje)
+    .map((linje) => linje.trim())
+    .join(", ")
 }
 
 export const getAge = (fodselsdato) => {
@@ -178,31 +182,33 @@ export const repackLeder = (leder) => {
 }
 
 export const createStruktur = (arbeidssted, fixedOrgFlat, graphQlFlat) => {
-  if ((fixedOrgFlat && !graphQlFlat) || (!fixedOrgFlat && graphQlFlat)) throw new Error('createStruktur must have either both topUnitNested or graphQlFlatUnits, or none')
+  if ((fixedOrgFlat && !graphQlFlat) || (!fixedOrgFlat && graphQlFlat)) throw new Error("createStruktur must have either both topUnitNested or graphQlFlatUnits, or none")
   if (fixedOrgFlat && graphQlFlat) {
     // If using fixedOrg structure
     const getOrgIdFromLink = (link) => {
-      if (!link?.href) throw new Error('No href in link')
-      const orgId = link.href.split('/').pop()
-      if (!orgId) throw new Error('No orgId found in link')
+      if (!link?.href) throw new Error("No href in link")
+      const orgId = link.href.split("/").pop()
+      if (!orgId) throw new Error("No orgId found in link")
       return orgId
     }
     const structureIds = []
-    let current = fixedOrgFlat.find(unit => unit.organisasjonsId.identifikatorverdi === arbeidssted.organisasjonsId.identifikatorverdi)
+    let current = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === arbeidssted.organisasjonsId.identifikatorverdi)
     if (!current) {
-      logger.error(`createStruktur: No unit with id ${arbeidssted.organisasjonsId.identifikatorverdi} found in fixedOrgFlat. Probably expired, or someone has messed with the data. Returning empty structure.`)
+      logger.error(
+        `createStruktur: No unit with id ${arbeidssted.organisasjonsId.identifikatorverdi} found in fixedOrgFlat. Probably expired, or someone has messed with the data. Returning empty structure.`
+      )
       return []
     }
     if (!current) throw new Error(`No unit with id ${arbeidssted.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
     structureIds.push(current.organisasjonsId.identifikatorverdi)
     while (getOrgIdFromLink(current._links?.overordnet[0]) !== current.organisasjonsId.identifikatorverdi) {
       const overordnetId = getOrgIdFromLink(current._links?.overordnet[0])
-      current = fixedOrgFlat.find(unit => unit.organisasjonsId.identifikatorverdi === overordnetId)
+      current = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === overordnetId)
       if (!current) throw new Error(`No overordnet unit with id ${overordnetId} found in fixedOrgFlat`)
       structureIds.push(current.organisasjonsId.identifikatorverdi)
     }
-    const structure = structureIds.map(id => {
-      const correspondingUnit = graphQlFlat.find(unit => unit.organisasjonsId.identifikatorverdi === id)
+    const structure = structureIds.map((id) => {
+      const correspondingUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === id)
       if (!correspondingUnit) throw new Error(`No corresponding unit with id ${id} found in graphQlFlat`)
       return {
         kortnavn: correspondingUnit.kortnavn,
@@ -217,19 +223,31 @@ export const createStruktur = (arbeidssted, fixedOrgFlat, graphQlFlat) => {
     // If using org structure directly from FINT
     const structure = []
     let current = arbeidssted
-    structure.push({ kortnavn: current.kortnavn, navn: current.navn, organisasjonsId: current.organisasjonsId.identifikatorverdi, organisasjonsKode: current.organisasjonsKode.identifikatorverdi, leder: repackLeder(current.leder) })
+    structure.push({
+      kortnavn: current.kortnavn,
+      navn: current.navn,
+      organisasjonsId: current.organisasjonsId.identifikatorverdi,
+      organisasjonsKode: current.organisasjonsKode.identifikatorverdi,
+      leder: repackLeder(current.leder)
+    })
     while (current.overordnet.organisasjonsId.identifikatorverdi !== current.organisasjonsId.identifikatorverdi) {
       current = current.overordnet
-      structure.push({ kortnavn: current.kortnavn, navn: current.navn, organisasjonsId: current.organisasjonsId.identifikatorverdi, organisasjonsKode: current.organisasjonsKode.identifikatorverdi, leder: repackLeder(current.leder) })
+      structure.push({
+        kortnavn: current.kortnavn,
+        navn: current.navn,
+        organisasjonsId: current.organisasjonsId.identifikatorverdi,
+        organisasjonsKode: current.organisasjonsKode.identifikatorverdi,
+        leder: repackLeder(current.leder)
+      })
     }
     return structure
   }
 }
 
 export const getNarmesteLeder = (ansattnummer, strukturlinje) => {
-  if (!ansattnummer || typeof ansattnummer !== 'string') throw new Error('No ansattnummer provided for getNarmesteLeder...')
-  if (!strukturlinje.some(enhet => enhet.leder && (enhet.leder.ansattnummer !== ansattnummer))) return null // Ingen ledere over her gitt... kanskje sette ordfører ellerno sjit
-  const correctLeaderUnit = strukturlinje.find(enhet => enhet.leder && (enhet.leder.ansattnummer !== ansattnummer)) // Finn første enhet som har en leder, som ikke er den ansatte
+  if (!ansattnummer || typeof ansattnummer !== "string") throw new Error("No ansattnummer provided for getNarmesteLeder...")
+  if (!strukturlinje.some((enhet) => enhet.leder && enhet.leder.ansattnummer !== ansattnummer)) return null // Ingen ledere over her gitt... kanskje sette ordfører ellerno sjit
+  const correctLeaderUnit = strukturlinje.find((enhet) => enhet.leder && enhet.leder.ansattnummer !== ansattnummer) // Finn første enhet som har en leder, som ikke er den ansatte
   const narmesteLeder = correctLeaderUnit?.leder || null
   return narmesteLeder
 }

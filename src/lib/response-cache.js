@@ -1,9 +1,9 @@
-import { responseCache } from '../../config.js'
-import { readFileSync, existsSync, unlinkSync } from "node:fs"
 import crypto from "node:crypto"
-import { FileCache } from './helpers/file-cache.js'
+import { existsSync, readFileSync, unlinkSync } from "node:fs"
+import { responseCache } from "../../config.js"
+import { FileCache } from "./helpers/file-cache.js"
 
-const responseFileCache = new FileCache('./.response-cache')
+const responseFileCache = new FileCache("./.response-cache")
 
 export const getResponse = (urlCacheKey) => {
   if (!responseCache.enabled) return null

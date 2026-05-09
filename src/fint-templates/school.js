@@ -1,6 +1,7 @@
 export default (schoolNumber, includeStudentSsn, includeUndervisningsgrupper) => {
   // Tabbed out for correct placement in the final query
-  const undervisningsgruppeQuery = includeUndervisningsgrupper ? `
+  const undervisningsgruppeQuery = includeUndervisningsgrupper
+    ? `
           undervisningsgruppe {
             navn
             termin {
@@ -31,7 +32,8 @@ export default (schoolNumber, includeStudentSsn, includeUndervisningsgrupper) =>
               systemId {identifikatorverdi}
             }
           }
-        ` : ''
+        `
+    : ""
   return {
     query: `
       query {
@@ -77,7 +79,7 @@ export default (schoolNumber, includeStudentSsn, includeUndervisningsgrupper) =>
             hovedskole
             elev {
               person {
-                ${includeStudentSsn ? 'fodselsnummer { identifikatorverdi }' : ''}
+                ${includeStudentSsn ? "fodselsnummer { identifikatorverdi }" : ""}
                 navn {
                   fornavn
                   mellomnavn

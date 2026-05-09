@@ -1,8 +1,8 @@
-import { AsyncLocalStorage } from "node:async_hooks";
+import { AsyncLocalStorage } from "node:async_hooks"
 
-import { logger } from "@vestfoldfylke/loglady";
+import { logger } from "@vestfoldfylke/loglady"
 
-const asyncLocalStorage = new AsyncLocalStorage();
+const asyncLocalStorage = new AsyncLocalStorage()
 
 // Runs the provided callback function within a context containing the provided LogConfig.
 
@@ -12,8 +12,8 @@ const asyncLocalStorage = new AsyncLocalStorage();
  * @param {() => Promise<any>} callback - The callback to run in context.
  */
 export async function runInContext(logConfig, callback) {
-  logger.setContextProvider(() => asyncLocalStorage.getStore());
-  return asyncLocalStorage.run(logConfig, callback);
+  logger.setContextProvider(() => asyncLocalStorage.getStore())
+  return asyncLocalStorage.run(logConfig, callback)
 }
 
 /**
@@ -21,8 +21,8 @@ export async function runInContext(logConfig, callback) {
  * @param {Object} logConfig - The log configuration object.
  */
 export function updateContext(logConfig) {
-  const _logConfig = asyncLocalStorage.getStore();
+  const _logConfig = asyncLocalStorage.getStore()
   if (_logConfig) {
-    Object.assign(_logConfig, logConfig);
+    Object.assign(_logConfig, logConfig)
   }
 }

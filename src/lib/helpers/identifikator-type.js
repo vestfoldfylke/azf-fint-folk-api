@@ -1,15 +1,19 @@
 /**
- * 
- * @param {string} identifikator 
+ *
+ * @param {string} identifikator
  * @returns {boolean}
  */
 export const isEmail = (identifikator) => {
-  return Boolean(String(identifikator).toLowerCase().match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/))
+  return Boolean(
+    String(identifikator)
+      .toLowerCase()
+      .match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+  )
 }
 
 /**
- * 
- * @param {string} identifikator 
+ *
+ * @param {string} identifikator
  * @returns {boolean}
  */
 export const isGuid = (identifikator) => {
@@ -17,19 +21,19 @@ export const isGuid = (identifikator) => {
 }
 
 /**
- * 
- * @param {string} str 
+ *
+ * @param {string} str
  * @returns {boolean}
  */
 const isStringInt = (str) => {
-  const num = Number(str);
+  const num = Number(str)
   // Check if it's a valid integer and the string wasn't empty/whitespace
-  return Number.isInteger(num) && str.trim() !== "";
-};
+  return Number.isInteger(num) && str.trim() !== ""
+}
 
 /**
- * 
- * @param {string} identifikator 
+ *
+ * @param {string} identifikator
  * @returns {boolean}
  */
 export const isFnr = (identifikator) => {
@@ -37,8 +41,8 @@ export const isFnr = (identifikator) => {
 }
 
 /**
- * 
- * @param {string} identifikator 
+ *
+ * @param {string} identifikator
  * @returns {boolean}
  */
 export const isAnsattnummer = (identifikator) => {

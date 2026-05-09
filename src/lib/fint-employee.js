@@ -1,9 +1,9 @@
-import graphQlEmployee from '../fint-templates/employee.js'
-import { getFixedUnits } from './fint-organization-fixed/cached-idm-units.js'
-import { repackNavn, repackAdresselinje, createStruktur, getAge, getNarmesteLeder, repackLeder, repackPeriode } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { getUserFromAnsattnummer } from './requests/call-graph.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlEmployee from "../fint-templates/employee.js"
+import { getFixedUnits } from "./fint-organization-fixed/cached-idm-units.js"
+import { createStruktur, getAge, getNarmesteLeder, repackAdresselinje, repackLeder, repackNavn, repackPeriode } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
+import { getUserFromAnsattnummer } from "./requests/call-graph.js"
 
 const repackEmployee = (fintEmployee, fixedOrgFlat, graphQlFlat) => {
   const name = repackNavn(fintEmployee.personalressurs.person.navn)
@@ -46,7 +46,9 @@ const repackEmployee = (fintEmployee, fixedOrgFlat, graphQlFlat) => {
     const aktiv = gyldighetsperiode?.aktiv && arbeidsforholdsperiode?.aktiv
     const strukturlinje = createStruktur(forhold.arbeidssted, fixedOrgFlat, graphQlFlat)
     if (aktiv && strukturlinje.length === 0) {
-      throw new Error(`Could not create strukturlinje for ansattnummer "${employee.ansattnummer}" and arbeidssted "${forhold.arbeidssted.organisasjonsId.identifikatorverdi}" - missing ${forhold.arbeidssted.organisasjonsId.identifikatorverdi} in fixedOrgFlat or graphQlFlat. Check if arbeidsted UTGÅR`)
+      throw new Error(
+        `Could not create strukturlinje for ansattnummer "${employee.ansattnummer}" and arbeidssted "${forhold.arbeidssted.organisasjonsId.identifikatorverdi}" - missing ${forhold.arbeidssted.organisasjonsId.identifikatorverdi} in fixedOrgFlat or graphQlFlat. Check if arbeidsted UTGÅR`
+      )
     }
     employee.arbeidsforhold.push({
       aktiv,
@@ -78,42 +80,42 @@ const repackEmployee = (fintEmployee, fixedOrgFlat, graphQlFlat) => {
     })
   }
 
-  employee.aktiv = employee.ansettelsesperiode.aktiv && employee.arbeidsforhold.some(forhold => forhold.aktiv)
+  employee.aktiv = employee.ansettelsesperiode.aktiv && employee.arbeidsforhold.some((forhold) => forhold.aktiv)
   return employee
 }
 
 /**
- * 
- * @param {string} ansattnummer 
+ *
+ * @param {string} ansattnummer
  * @returns {Promise<{[key: string]: any} | null>}
  */
 const fintEmployee = async (ansattnummer) => {
-  logger.info('fintEmployee - Creating graph payload {ansattnummer}', ansattnummer)
+  logger.info("fintEmployee - Creating graph payload {ansattnummer}", ansattnummer)
   const payload = graphQlEmployee(ansattnummer)
-  logger.info('fintEmployee - Created graph payload, sending request to FINT {ansattnummer}', ansattnummer)
+  logger.info("fintEmployee - Created graph payload, sending request to FINT {ansattnummer}", ansattnummer)
   const { data } = await fintGraph(payload)
   if (!data.personalressurs?.person?.navn?.fornavn) {
     logger.info(`fintEmployee - No employee with ansattnummer "${ansattnummer}" found in FINT`)
     return null
   }
-  logger.info('fintEmployee - Got response from FINT, repacking result {ansattnummer}', ansattnummer)
+  logger.info("fintEmployee - Got response from FINT, repacking result {ansattnummer}", ansattnummer)
 
   // Så må vi hente idm-cached-units, og sende med den til repackEmployee, for å kunne lage strukturlinja
   const { fixedOrgFlat, graphQlFlat } = await getFixedUnits()
 
   const repacked = repackEmployee(data, fixedOrgFlat, graphQlFlat)
-  logger.info('fintEmployee - Repacked result - fetching EntraId info {ansattnummer}', ansattnummer)
+  logger.info("fintEmployee - Repacked result - fetching EntraId info {ansattnummer}", ansattnummer)
   const aad = await getUserFromAnsattnummer(ansattnummer)
   if (aad?.value && aad.value.length === 1) {
-    logger.info('fintEmployee - Found user in EntraId {ansattnummer}', ansattnummer)
+    logger.info("fintEmployee - Found user in EntraId {ansattnummer}", ansattnummer)
     const { userPrincipalName, officeLocation } = aad.value[0]
     repacked.upn = userPrincipalName || null
     repacked.entraIdOfficeLocation = officeLocation || null
   } else {
-    logger.info('fintEmployee - Could not find user in EntraId {ansattnummer}', ansattnummer)
+    logger.info("fintEmployee - Could not find user in EntraId {ansattnummer}", ansattnummer)
   }
 
   return repacked
 }
 
-export { repackEmployee, fintEmployee }
+export { fintEmployee, repackEmployee }

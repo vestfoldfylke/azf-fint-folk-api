@@ -1,6 +1,7 @@
 export default (ansattnummer) => {
   return {
-    query: `
+    query:
+      `
       query {
         personalressurs(ansattnummer: "${ansattnummer}") {
           person {
@@ -45,8 +46,8 @@ export default (ansattnummer) => {
             epostadresse
             mobiltelefonnummer
           }
-					`
-					/* Fullmakt for ting til å kræsje...
+					` +
+      /* Fullmakt for ting til å kræsje...
 					fullmakt {
 						systemId {
 							identifikatorverdi
@@ -71,7 +72,7 @@ export default (ansattnummer) => {
 						}
 					}
 					*/
-					 + `
+      `
           arbeidsforhold {
             systemId {
               identifikatorverdi

@@ -1,22 +1,24 @@
-import graphQlOrganization from '../fint-templates/organization.js'
-import { repackAdresselinje, repackLeder, repackNavn, repackPeriode } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlOrganization from "../fint-templates/organization.js"
+import { repackAdresselinje, repackLeder, repackNavn, repackPeriode } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
 
 const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
-  if ((!fixedOrgFlat && graphQlFlat) || (fixedOrgFlat && !graphQlFlat)) throw new Error('fixedOrgFlat and grahQlFlat must be either both set or both not set')
+  if ((!fixedOrgFlat && graphQlFlat) || (fixedOrgFlat && !graphQlFlat)) throw new Error("fixedOrgFlat and grahQlFlat must be either both set or both not set")
 
   const gyldighetsperiode = repackPeriode(fintOrganization.organisasjonselement.gyldighetsperiode)
   let overordnet = null
   if (fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi !== fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi) {
     let overordnetData = null
     if (fixedOrgFlat && graphQlFlat) {
-      const correspondingFixedOrgUnit = fixedOrgFlat.find(unit => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
+      const correspondingFixedOrgUnit = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
       if (!correspondingFixedOrgUnit) throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
-      if (!correspondingFixedOrgUnit._links.overordnet || correspondingFixedOrgUnit._links.overordnet.length === 0) throw new Error(`No overordnet link found in corresponding unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
-      const fixedOrgOverordnetId = correspondingFixedOrgUnit._links.overordnet[0].href.split('/').pop()
-      if (!fixedOrgOverordnetId) throw new Error(`No overordnet id found in overordnet href for unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
-      const correspondingGraphQlUnit = graphQlFlat.find(unit => unit.organisasjonsId.identifikatorverdi === fixedOrgOverordnetId)
+      if (!correspondingFixedOrgUnit._links.overordnet || correspondingFixedOrgUnit._links.overordnet.length === 0)
+        throw new Error(`No overordnet link found in corresponding unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      const fixedOrgOverordnetId = correspondingFixedOrgUnit._links.overordnet[0].href.split("/").pop()
+      if (!fixedOrgOverordnetId)
+        throw new Error(`No overordnet id found in overordnet href for unit with id ${fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
+      const correspondingGraphQlUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fixedOrgOverordnetId)
       if (!correspondingGraphQlUnit) throw new Error(`No corresponding unit with id ${fixedOrgOverordnetId} found in graphQlFlat`)
       overordnetData = correspondingGraphQlUnit
     } else {
@@ -48,7 +50,8 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
       postnummer: fintOrganization.organisasjonselement.postadresse?.postnummer || null,
       poststed: fintOrganization.organisasjonselement.postadresse?.poststed || null
     },
-    forretningsadresse: { // Skal være tilsvarende enhetsregisteret
+    forretningsadresse: {
+      // Skal være tilsvarende enhetsregisteret
       adresselinje: repackAdresselinje(fintOrganization.organisasjonselement.forretningsadresse?.adresselinje),
       postnummer: fintOrganization.organisasjonselement.forretningsadresse?.postnummer || null,
       poststed: fintOrganization.organisasjonselement.forretningsadresse?.poststed || null
@@ -64,14 +67,14 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
   // Underordnet
   let underordnetToHandle = []
   if (fixedOrgFlat && graphQlFlat) {
-    const correspondingFixedOrgUnit = fixedOrgFlat.find(unit => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
+    const correspondingFixedOrgUnit = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
     if (!correspondingFixedOrgUnit) throw new Error(`No corresponding unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} found in fixedOrgFlat`)
     const fixedOrgUnderordnetLinks = correspondingFixedOrgUnit._links.underordnet || []
     for (const link of fixedOrgUnderordnetLinks) {
-      if (!link.href) throw new Error('No href in underordnet link')
-      const underordnetId = link.href.split('/').pop()
+      if (!link.href) throw new Error("No href in underordnet link")
+      const underordnetId = link.href.split("/").pop()
       if (!underordnetId) throw new Error(`No underordnet id found in underordnet href for unit with id ${fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi} in fixedOrgFlat`)
-      const correspondingGraphQlUnit = graphQlFlat.find(unit => unit.organisasjonsId.identifikatorverdi === underordnetId)
+      const correspondingGraphQlUnit = graphQlFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === underordnetId)
       if (!correspondingGraphQlUnit) throw new Error(`No corresponding unit with id ${underordnetId} found in graphQlFlat`)
       underordnetToHandle.push(correspondingGraphQlUnit)
     }
@@ -114,17 +117,17 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
 }
 
 const fintOrganization = async (identifikator, identifikatorverdi) => {
-  logger.info('fintOrganization - Creating graph payload {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
+  logger.info("fintOrganization - Creating graph payload {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
   const payload = graphQlOrganization(identifikator, identifikatorverdi)
-  logger.info('fintOrganization - Created graph payload, sending request to FINT {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
+  logger.info("fintOrganization - Created graph payload, sending request to FINT {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
   const { data } = await fintGraph(payload)
   if (!data.organisasjonselement?.organisasjonsId?.identifikatorverdi) {
     logger.info(`fintOrganization - No organization with ${identifikator} "${identifikatorverdi}" found in FINT`)
     return null
   }
-  logger.info('fintOrganization - Got response from FINT, repacking result {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
+  logger.info("fintOrganization - Got response from FINT, repacking result {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
   const repacked = repackOrganization(data)
-  logger.info('fintOrganization - Repacked result {identifikator} {identifikatorverdi}', identifikator, identifikatorverdi)
+  logger.info("fintOrganization - Repacked result {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
 
   return repacked
 }

@@ -1,7 +1,7 @@
-import graphQlPerson from '../fint-templates/person.js'
-import { repackNavn, repackAdresselinje, getAge } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlPerson from "../fint-templates/person.js"
+import { getAge, repackAdresselinje, repackNavn } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
 
 const repackPerson = (fintPerson) => {
   const name = repackNavn(fintPerson.person.navn)
@@ -43,22 +43,22 @@ const repackPerson = (fintPerson) => {
       navn: fintPerson.person.malform?.navn || null
     },
     bilde: fintPerson.person.bilde || null,
-    foreldreansvar: 'Kommer forhåpentligvis',
-    parorende: 'Kommer forhåpentligvis'
+    foreldreansvar: "Kommer forhåpentligvis",
+    parorende: "Kommer forhåpentligvis"
   }
   return person
 }
 
 const fintPerson = async (fodselsnummer) => {
-  logger.info('fintPerson - Creating graph payload {fodselsnummer}', fodselsnummer)
+  logger.info("fintPerson - Creating graph payload {fodselsnummer}", fodselsnummer)
   const payload = graphQlPerson(fodselsnummer)
-  logger.info('fintPerson - Created graph payload, sending request to FINT {fodselsnummer}', fodselsnummer)
+  logger.info("fintPerson - Created graph payload, sending request to FINT {fodselsnummer}", fodselsnummer)
   const { data } = await fintGraph(payload)
   if (!data.person?.navn?.fornavn) {
     logger.info(`fintPerson - No employee with fodselsnummer "${fodselsnummer}" found in FINT`)
     return null
   }
-  logger.info('fintPerson - Got response from FINT, repacking result {fodselsnummer}', fodselsnummer)
+  logger.info("fintPerson - Got response from FINT, repacking result {fodselsnummer}", fodselsnummer)
   const repacked = repackPerson(data)
   return repacked
 }

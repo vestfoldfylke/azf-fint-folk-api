@@ -1,7 +1,7 @@
 // We only decode, as built in entra auth verifies. Decode only for metadata - not authentication.
 const decodeJwt = (token) => {
-  const base64Payload = token.replace('Bearer ', '').split('.')[1]
-  const payload = Buffer.from(base64Payload, 'base64url').toString()
+  const base64Payload = token.replace("Bearer ", "").split(".")[1]
+  const payload = Buffer.from(base64Payload, "base64url").toString()
   return JSON.parse(payload)
 }
 
@@ -21,16 +21,16 @@ const decodeJwt = (token) => {
  */
 export const decodeAccessToken = (token) => {
   const result = {
-    upn: '',
-    appid: '',
-    oid: '',
+    upn: "",
+    appid: "",
+    oid: "",
     verified: false,
-    msg: '',
+    msg: "",
     roles: []
   }
 
   if (!token) {
-    result.msg = 'Missing token in authorization header'
+    result.msg = "Missing token in authorization header"
     return result
   }
 
@@ -38,23 +38,23 @@ export const decodeAccessToken = (token) => {
   try {
     decoded = decodeJwt(token)
   } catch (error) {
-    result.msg = 'Token is not a valid jwt'
+    result.msg = "Token is not a valid jwt"
     return result
   }
 
   if (!decoded) {
-    result.msg = 'Token is not a valid jwt'
+    result.msg = "Token is not a valid jwt"
     return result
   }
 
   const { upn, appid, roles, oid } = decoded
   if (!upn && !appid) {
-    result.msg = 'Token is missing upn or appId'
+    result.msg = "Token is missing upn or appId"
     return result
   }
 
   result.appid = appid
-  result.upn = upn || 'appReg'
+  result.upn = upn || "appReg"
   result.oid = oid
   result.verified = true
   result.roles = roles || []

@@ -1,7 +1,7 @@
-import { topUnitId } from '../../config.js'
+import { topUnitId } from "../../config.js"
 
 export default () => {
-	const base = `
+  const base = `
 		organisasjonsId {
 			identifikatorverdi
 		}

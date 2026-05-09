@@ -1,8 +1,8 @@
-import graphQlStudent from '../fint-templates/student.js'
-import { skoleElementIsAktiv, repackNavn, repackSkolear, repackTermin, repackAdresselinje, repackSkole, repackMiniSkole, getAge, repackPeriode } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { getStudentFromFeidenavn } from './requests/call-graph.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlStudent from "../fint-templates/student.js"
+import { getAge, repackAdresselinje, repackMiniSkole, repackNavn, repackPeriode, repackSkole, repackSkolear, repackTermin, skoleElementIsAktiv } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
+import { getStudentFromFeidenavn } from "./requests/call-graph.js"
 
 const repackTeacher = (undervisningsforhold, contactTeachers) => {
   if (undervisningsforhold.undervisningsforhold) undervisningsforhold = undervisningsforhold.undervisningsforhold // I gruppemedlemskap ligger undervisningsforholdet inne i en prop som heter undervisningsforhold...
@@ -21,7 +21,7 @@ const repackTeacher = (undervisningsforhold, contactTeachers) => {
 const repackStudent = (fintStudent) => {
   if (fintStudent.person) fintStudent = fintStudent.person // Searched by fnr, simply go a step in to use the same functionality as for feidenavn
   const name = repackNavn(fintStudent.elev.person.navn)
-  const hovedskoleElevforhold = fintStudent.elev.elevforhold.find(f => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
+  const hovedskoleElevforhold = fintStudent.elev.elevforhold.find((f) => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
   const student = {
     feidenavn: fintStudent.elev.feidenavn?.identifikatorverdi || null,
     elevnummer: fintStudent.elev.elevnummer.identifikatorverdi,
@@ -100,7 +100,7 @@ const repackStudent = (fintStudent) => {
         skole: repackMiniSkole(gruppe.skole, student.hovedskole),
         termin,
         skolear,
-        undervisningsforhold: gruppe.undervisningsforhold.map(larer => {
+        undervisningsforhold: gruppe.undervisningsforhold.map((larer) => {
           const teacher = repackTeacher(larer, [larer.skoleressurs?.feidenavn?.identifikatorverdi])
           if (aktiv && teacher.feidenavn && !contactTeachers.includes(teacher.feidenavn)) {
             contactTeachers.push(teacher.feidenavn)
@@ -127,7 +127,7 @@ const repackStudent = (fintStudent) => {
         skole: repackMiniSkole(gruppe.skole, student.hovedskole),
         termin,
         skolear,
-        undervisningsforhold: gruppe.undervisningsforhold.map(larer => repackTeacher(larer, contactTeachers))
+        undervisningsforhold: gruppe.undervisningsforhold.map((larer) => repackTeacher(larer, contactTeachers))
       })
     }
 
@@ -160,7 +160,7 @@ const repackStudent = (fintStudent) => {
         skole: repackMiniSkole(gruppe.skole, student.hovedskole),
         termin,
         skolear,
-        undervisningsforhold: gruppe.undervisningsforhold.map(larer => repackTeacher(larer, contactTeachers))
+        undervisningsforhold: gruppe.undervisningsforhold.map((larer) => repackTeacher(larer, contactTeachers))
       })
     }
     student.elevforhold.push(elevforhold)
@@ -169,29 +169,29 @@ const repackStudent = (fintStudent) => {
 }
 
 const fintStudent = async (feidenavn, elevnummer) => {
-  logger.info('fintStudent - Creating graph payload {feidenavn}', feidenavn)
+  logger.info("fintStudent - Creating graph payload {feidenavn}", feidenavn)
   const payload = graphQlStudent(feidenavn, elevnummer)
-  logger.info('fintStudent - Created graph payload, sending request to FINT {feidenavn}', feidenavn)
+  logger.info("fintStudent - Created graph payload, sending request to FINT {feidenavn}", feidenavn)
   const { data } = await fintGraph(payload)
   if (!data.elev?.person?.navn?.fornavn) {
     logger.info(`fintStudent - No student with feidenavn "${feidenavn}" found in FINT`)
     return null
   }
-  logger.info('fintStudent - Got response from FINT, repacking result {feidenavn}', feidenavn)
+  logger.info("fintStudent - Got response from FINT, repacking result {feidenavn}", feidenavn)
   const repacked = repackStudent(data)
-  logger.info('fintStudent - Repacked result - fetching AzureAd info {feidenavn}', feidenavn)
+  logger.info("fintStudent - Repacked result - fetching AzureAd info {feidenavn}", feidenavn)
   if (feidenavn) {
     try {
       const aad = await getStudentFromFeidenavn(feidenavn)
       if (aad) {
-        logger.info('fintStudent - Found user in AzureAd {feidenavn}', feidenavn)
+        logger.info("fintStudent - Found user in AzureAd {feidenavn}", feidenavn)
         const { userPrincipalName } = aad
         repacked.upn = userPrincipalName || null
       } else {
-        logger.info('fintStudent - Could not find user in AzureAd {feidenavn}', feidenavn)
+        logger.info("fintStudent - Could not find user in AzureAd {feidenavn}", feidenavn)
       }
     } catch (error) {
-      logger.error('fintStudent - Failed when getting user from AzureAd. Cannot populate entra values', error.toString())
+      logger.error("fintStudent - Failed when getting user from AzureAd. Cannot populate entra values", error.toString())
     }
   }
   if (!repacked.upn) repacked.upn = null // If no upn was found, set it to null

@@ -1,28 +1,28 @@
-import { logger } from '@vestfoldfylke/loglady'
-import { readFileSync, existsSync, unlinkSync, writeFileSync, mkdirSync } from "node:fs"
 import crypto from "node:crypto"
+import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs"
+import { logger } from "@vestfoldfylke/loglady"
 
 export class FileCache {
   constructor(cachePath) {
-    if (!cachePath.startsWith('./')) {
+    if (!cachePath.startsWith("./")) {
       throw new Error('Cache path must be a relative path starting with "./"')
     }
     this.cachePath = cachePath
   }
 
   #cacheKeyToHash(cacheKey) {
-    if (typeof cacheKey !== 'string') {
-      throw new Error('Cache key must be a string')
+    if (typeof cacheKey !== "string") {
+      throw new Error("Cache key must be a string")
     }
-    return crypto.createHash('md5').update(cacheKey).digest('hex')
+    return crypto.createHash("md5").update(cacheKey).digest("hex")
   }
-  
+
   get(cacheKey) {
     if (!existsSync(`${this.cachePath}/${this.#cacheKeyToHash(cacheKey)}.json`)) {
       return null
     }
     try {
-      const cachedData = JSON.parse(readFileSync(`${this.cachePath}/${this.#cacheKeyToHash(cacheKey)}.json`, 'utf-8'))
+      const cachedData = JSON.parse(readFileSync(`${this.cachePath}/${this.#cacheKeyToHash(cacheKey)}.json`, "utf-8"))
       if (Date.now() > new Date(cachedData.expiry).getTime()) {
         logger.info(`FileCache - cached data for key: {cacheKey} is expired, will have to fetch and generate data`, cacheKey)
         unlinkSync(`${this.cachePath}/${this.#cacheKeyToHash(cacheKey)}.json`)
@@ -42,8 +42,8 @@ export class FileCache {
 
   set(cacheKey, data, ttl) {
     try {
-      if (typeof ttl !== 'number' || isNaN(ttl) || ttl <= 0) {
-        throw new Error('TTL (time-to-live) must be a positive number')
+      if (typeof ttl !== "number" || isNaN(ttl) || ttl <= 0) {
+        throw new Error("TTL (time-to-live) must be a positive number")
       }
       const expiry = new Date(Date.now() + ttl * 1000).toISOString()
       const cacheData = {

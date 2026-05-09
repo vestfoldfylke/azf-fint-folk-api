@@ -1,43 +1,42 @@
-import graphToken from './graph-token.js'
-import { graphUrl, feidenavnDomain, employeeNumberExtenstionAttribute, studentUpnSuffix } from '../../../config.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import { employeeNumberExtenstionAttribute, feidenavnDomain, graphUrl, studentUpnSuffix } from "../../../config.js"
+import graphToken from "./graph-token.js"
 
 /**
- * 
- * @param {string} resourceQuery 
- * @param {boolean} advancedQuery 
+ *
+ * @param {string} resourceQuery
+ * @param {boolean} advancedQuery
  * @returns {Promise<{[key: string]: any} | null>}
  */
 const callGraph = async (resourceQuery, advancedQuery = false) => {
   if (!resourceQuery) throw new Error('Missing required parameter "resourceQuery"')
-  if (!resourceQuery.startsWith('/')) throw new Error('Parameter "resourceQuery" must start with "/"')
-  
-  
+  if (!resourceQuery.startsWith("/")) throw new Error('Parameter "resourceQuery" must start with "/"')
+
   const accessToken = await graphToken()
 
   /** @type {Record<string, string>} */
   const headers = { Authorization: `Bearer ${accessToken}` }
   if (advancedQuery) {
-    headers['ConsistencyLevel'] = 'eventual'
+    headers["ConsistencyLevel"] = "eventual"
   }
 
   const response = await fetch(`${graphUrl}${resourceQuery}`, { headers })
 
   if (!response.ok) {
     const errorData = await response.json()
-    logger.error('Graph API request failed. Status: {statusCode} {statusText}, error: {@error}', response.status, response.statusText, errorData)
+    logger.error("Graph API request failed. Status: {statusCode} {statusText}, error: {@error}", response.status, response.statusText, errorData)
     if (response.status === 404) {
       return null
     }
     throw new Error(`Graph API request failed. Status: ${response.status} ${response.statusText}`)
   }
-  
+
   return await response.json()
 }
 
 /**
- * 
- * @param {string} upn 
+ *
+ * @param {string} upn
  * @returns {Promise<string | null>}
  */
 export const getFeidenavn = async (upn) => {
@@ -49,8 +48,8 @@ export const getFeidenavn = async (upn) => {
 }
 
 /**
- * 
- * @param {string} upn 
+ *
+ * @param {string} upn
  * @returns {Promise<string | null>}
  */
 export const getAnsattnummer = async (upn) => {
@@ -63,8 +62,8 @@ export const getAnsattnummer = async (upn) => {
 }
 
 /**
- * 
- * @param {string} samAccount 
+ *
+ * @param {string} samAccount
  * @returns {Promise<{[key: string]: any} | null>}
  */
 export const getUserFromSamAccount = async (samAccount) => {
@@ -72,24 +71,23 @@ export const getUserFromSamAccount = async (samAccount) => {
 }
 
 /**
- * 
- * @param {string} feidenavn 
+ *
+ * @param {string} feidenavn
  * @returns {Promise<{[key: string]: any} | null>}
  */
 export const getStudentFromFeidenavn = async (feidenavn) => {
-  const upnPrefix = feidenavn.substring(0, feidenavn.indexOf('@'))
+  const upnPrefix = feidenavn.substring(0, feidenavn.indexOf("@"))
   const upn = `${upnPrefix}${studentUpnSuffix}`
-  
+
   const data = await callGraph(`/users/${upn}`)
   if (!data) return null
-  
+
   return data
 }
 
-
 /**
- * 
- * @param {string} ansattnummer 
+ *
+ * @param {string} ansattnummer
  * @returns {Promise<{[key: string]: any} | null>}
  */
 export const getUserFromAnsattnummer = async (ansattnummer) => {
@@ -97,8 +95,8 @@ export const getUserFromAnsattnummer = async (ansattnummer) => {
 }
 
 /**
- * 
- * @param {string} ansattnummer 
+ *
+ * @param {string} ansattnummer
  * @returns {Promise<{feidenavn: string} | null>}
  */
 export const getFeidenavnFromAnsattnummer = async (ansattnummer) => {

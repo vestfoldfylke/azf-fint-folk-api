@@ -1,5 +1,7 @@
 export default (feidenavn, elevnummer) => {
-  if (!feidenavn && !elevnummer) throw new Error('Either feidenavn or elevnummer must be provided to fintStudent function')
+  if (!feidenavn && !elevnummer) {
+    throw new Error("Either feidenavn or elevnummer must be provided to fintStudent function")
+  }
   const identificator = feidenavn ? `feidenavn: "${feidenavn}"` : `elevnummer: "${elevnummer}"`
   return {
     query: `

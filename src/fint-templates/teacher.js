@@ -117,7 +117,7 @@ export default (feidenavn, includeStudentSsn) => {
                 elevforhold {
                   elev {
                     person {
-                      ${includeStudentSsn ? 'fodselsnummer { identifikatorverdi }' : ''}
+                      ${includeStudentSsn ? "fodselsnummer { identifikatorverdi }" : ""}
                       navn {
                         fornavn
                         mellomnavn
@@ -199,7 +199,7 @@ export default (feidenavn, includeStudentSsn) => {
               elevforhold {
                 elev {
                   person {
-                    ${includeStudentSsn ? 'fodselsnummer { identifikatorverdi }' : ''}
+                    ${includeStudentSsn ? "fodselsnummer { identifikatorverdi }" : ""}
                     navn {
                       fornavn
                       mellomnavn
@@ -223,7 +223,7 @@ export default (feidenavn, includeStudentSsn) => {
                 elevforhold {
                   elev {
                     person {
-                      ${includeStudentSsn ? 'fodselsnummer { identifikatorverdi }' : ''}
+                      ${includeStudentSsn ? "fodselsnummer { identifikatorverdi }" : ""}
                       navn {
                         fornavn
                         mellomnavn

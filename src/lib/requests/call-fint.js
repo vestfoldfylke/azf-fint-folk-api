@@ -1,6 +1,6 @@
-import { logger } from '@vestfoldfylke/loglady'
-import { fint } from '../../../config.js'
-import getFintToken from './fint-token.js'
+import { logger } from "@vestfoldfylke/loglady"
+import { fint } from "../../../config.js"
+import getFintToken from "./fint-token.js"
 
 /**
  * @typedef {object} FintGraphResponse
@@ -16,9 +16,9 @@ export const fintGraph = async (payload) => {
   const token = await getFintToken()
 
   const response = await fetch(`${fint.url}/graphql/graphql`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify(payload)
@@ -26,7 +26,7 @@ export const fintGraph = async (payload) => {
 
   if (!response.ok) {
     const errorData = await response.json()
-    logger.error('Fint GraphQL request failed. Status: {statusCode} {statusText}, error: {@error}', response.status, response.statusText, errorData)
+    logger.error("Fint GraphQL request failed. Status: {statusCode} {statusText}, error: {@error}", response.status, response.statusText, errorData)
     throw new Error(`Fint GraphQL request failed. Status: ${response.status} ${response.statusText}`)
   }
 
@@ -38,7 +38,8 @@ export const fintGraph = async (payload) => {
       return fintResponseData
     }
   }
-  if (fintResponseData.errors && fintResponseData.errors.length > 0) throw new Error(typeof fintResponseData.errors === 'object' ? JSON.stringify(fintResponseData.errors, null, 2) : fintResponseData.errors.toString())
+  if (fintResponseData.errors && fintResponseData.errors.length > 0)
+    throw new Error(typeof fintResponseData.errors === "object" ? JSON.stringify(fintResponseData.errors, null, 2) : fintResponseData.errors.toString())
   return fintResponseData
 }
 
@@ -51,7 +52,7 @@ export const fintRest = async (resource) => {
   const token = await getFintToken()
 
   const response = await fetch(`${fint.url}/${resource}`, {
-    method: 'GET',
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -59,7 +60,7 @@ export const fintRest = async (resource) => {
 
   if (!response.ok) {
     const errorData = await response.json()
-    logger.error('Fint REST request failed. Status: {statusCode} {statusText}, error: {@error}', response.status, response.statusText, errorData)
+    logger.error("Fint REST request failed. Status: {statusCode} {statusText}, error: {@error}", response.status, response.statusText, errorData)
     throw new Error(`Fint REST request failed with code ${response.status} ${response.statusText}`)
   }
 

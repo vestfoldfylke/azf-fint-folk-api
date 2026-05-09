@@ -1,9 +1,9 @@
 export class HttpError extends Error {
   /**
-   * 
-   * @param {number} status 
-   * @param {string} message 
-   * @param {object} [data] 
+   *
+   * @param {number} status
+   * @param {string} message
+   * @param {object} [data]
    */
   constructor(status, message, data) {
     super(message)

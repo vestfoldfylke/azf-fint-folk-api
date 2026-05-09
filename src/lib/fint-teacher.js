@@ -1,8 +1,8 @@
-import graphQlTeacher from '../fint-templates/teacher.js'
-import { skoleElementIsAktiv, repackNavn, repackSkolear, repackTermin, repackAdresselinje, repackSkole, repackMiniSkole, getAge, repackPeriode } from './helpers/repack-fint.js'
-import { fintGraph } from './requests/call-fint.js'
-import { getUserFromSamAccount } from './requests/call-graph.js'
-import { logger } from '@vestfoldfylke/loglady'
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlTeacher from "../fint-templates/teacher.js"
+import { getAge, repackAdresselinje, repackMiniSkole, repackNavn, repackPeriode, repackSkole, repackSkolear, repackTermin, skoleElementIsAktiv } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
+import { getUserFromSamAccount } from "./requests/call-graph.js"
 
 const repackStudent = (elevforhold, contactTeacherGroups) => {
   if (elevforhold.elevforhold) elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
@@ -13,7 +13,7 @@ const repackStudent = (elevforhold, contactTeacherGroups) => {
     etternavn: name.etternavn,
     feidenavn: elevforhold.elev?.feidenavn?.identifikatorverdi || null,
     elevnummer: elevforhold.elev?.elevnummer?.identifikatorverdi || null,
-    kontaktlarer: elevforhold.kontaktlarergruppe.some(group1 => contactTeacherGroups.some(group2 => group1.systemId.identifikatorverdi === group2.systemId))
+    kontaktlarer: elevforhold.kontaktlarergruppe.some((group1) => contactTeacherGroups.some((group2) => group1.systemId.identifikatorverdi === group2.systemId))
   }
   if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
   return repackedStudent
@@ -21,7 +21,7 @@ const repackStudent = (elevforhold, contactTeacherGroups) => {
 
 const repackTeacher = (fintTeacher) => {
   const name = repackNavn(fintTeacher.skoleressurs.personalressurs.person.navn)
-  const hovedskoleUndervisningsforhold = fintTeacher.skoleressurs.undervisningsforhold.find(f => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
+  const hovedskoleUndervisningsforhold = fintTeacher.skoleressurs.undervisningsforhold.find((f) => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
   const teacher = {
     feidenavn: fintTeacher.skoleressurs.feidenavn.identifikatorverdi,
     ansattnummer: fintTeacher.skoleressurs.personalressurs?.ansattnummer.identifikatorverdi,
@@ -69,7 +69,7 @@ const repackTeacher = (fintTeacher) => {
       undervisningsgrupper: []
     }
     for (const gruppe of forhold.kontaktlarergruppe) {
-      if (gruppe.undervisningsforhold.find(f => f.skoleressurs.feidenavn.identifikatorverdi === teacher.feidenavn)) {
+      if (gruppe.undervisningsforhold.find((f) => f.skoleressurs.feidenavn.identifikatorverdi === teacher.feidenavn)) {
         const termin = repackTermin(gruppe.termin)
         const skolear = repackSkolear(gruppe.skolear)
         undervisningsforhold.kontaktlarergrupper.push({
@@ -95,7 +95,7 @@ const repackTeacher = (fintTeacher) => {
         skole: repackMiniSkole(gruppe.skole, teacher.hovedskole),
         termin,
         skolear,
-        elever: gruppe.gruppemedlemskap.map(medlem => repackStudent(medlem, undervisningsforhold.kontaktlarergrupper))
+        elever: gruppe.gruppemedlemskap.map((medlem) => repackStudent(medlem, undervisningsforhold.kontaktlarergrupper))
       })
     }
     for (const gruppe of forhold.undervisningsgruppe) {
@@ -110,7 +110,7 @@ const repackTeacher = (fintTeacher) => {
         skole: repackMiniSkole(gruppe.skole, teacher.hovedskole),
         termin,
         skolear,
-        elever: gruppe.elevforhold.map(elev => repackStudent(elev, undervisningsforhold.kontaktlarergrupper))
+        elever: gruppe.elevforhold.map((elev) => repackStudent(elev, undervisningsforhold.kontaktlarergrupper))
       })
     }
     teacher.undervisningsforhold.push(undervisningsforhold)
@@ -119,30 +119,30 @@ const repackTeacher = (fintTeacher) => {
 }
 
 const fintTeacher = async (feidenavn, includeStudentSsn) => {
-  logger.info('fintTeacher - Creating graph payload {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+  logger.info("fintTeacher - Creating graph payload {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
   const payload = graphQlTeacher(feidenavn, includeStudentSsn)
-  logger.info('fintTeacher - Created graph payload, sending request to FINT {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+  logger.info("fintTeacher - Created graph payload, sending request to FINT {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
   const { data } = await fintGraph(payload)
   if (!data.skoleressurs?.personalressurs?.person?.navn?.fornavn) {
     logger.info(`fintTeacher - No teacher with feidenavn "${feidenavn}" found in FINT`)
     return null
   }
-  logger.info('Got response from FINT, repacking result {feidenavn}', feidenavn)
+  logger.info("Got response from FINT, repacking result {feidenavn}", feidenavn)
   const repacked = repackTeacher(data)
-  logger.info('fintTeacher - Repacked result - fetching AzureAd info {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+  logger.info("fintTeacher - Repacked result - fetching AzureAd info {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
   try {
-    const aad = await getUserFromSamAccount(feidenavn.split('@')[0])
+    const aad = await getUserFromSamAccount(feidenavn.split("@")[0])
     if (aad.value && aad.value.length === 1) {
-      logger.info('fintTeacher - Found user in AzureAd {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+      logger.info("fintTeacher - Found user in AzureAd {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
       const { userPrincipalName, officeLocation } = aad.value[0]
       repacked.upn = userPrincipalName || null
       repacked.azureOfficeLocation = officeLocation || null
     } else {
-      logger.info('fintTeacher - Could not find user in AzureAd {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+      logger.info("fintTeacher - Could not find user in AzureAd {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
     }
   } catch (error) {
     if (error.response?.status === 404) {
-      logger.info('fintTeacher - 404 - Could not find user in AzureAd {feidenavn} {includeStudentSsn}', feidenavn, includeStudentSsn)
+      logger.info("fintTeacher - 404 - Could not find user in AzureAd {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
     } else {
       throw error
     }
