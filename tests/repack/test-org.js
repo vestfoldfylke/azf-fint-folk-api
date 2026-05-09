@@ -1,6 +1,6 @@
 import { fint } from '../../config.js'
 const { url } = fint
-import { getExceptionRules } from '../../lib/fint-organization-fixed/exception-rules.js'
+import { getExceptionRules } from '../../src/lib/fint-organization-fixed/exception-rules.js'
 
 const createTestOrgUnit = (unit) => {
   if (!unit || typeof unit !== 'object') throw new Error('Missing required parameter object "unit"')

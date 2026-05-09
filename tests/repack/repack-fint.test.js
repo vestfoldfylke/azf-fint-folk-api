@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { aktivPeriode, repackPeriode, repackLeder, createStruktur } from '../../lib/helpers/repack-fint.js'
+import { aktivPeriode, repackPeriode, repackLeder, createStruktur } from '../../src/lib/helpers/repack-fint.js'
 
 describe('aktivPeriode is aktiv when', () => {
   it('Sluttdato is null', () => {

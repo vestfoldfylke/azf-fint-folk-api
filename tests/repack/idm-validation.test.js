@@ -2,7 +2,7 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { organizationFixed, fint } from '../../config.js'
 const { url } = fint
-import { validateRawOrganizationUnits, validateExceptionRules } from '../../lib/fint-organization-fixed/idm-validation.js'
+import { validateRawOrganizationUnits, validateExceptionRules } from '../../src/lib/fint-organization-fixed/idm-validation.js'
 import { createTestOrgUnit } from './test-org.js'
 
 const createSimpleOrg = () => {

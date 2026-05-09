@@ -2,9 +2,9 @@ import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { organizationFixed, fint } from '../../config.js'
 const { url } = fint
-import { getExceptionRules } from '../../lib/fint-organization-fixed/exception-rules.js'
-import { repackFintIdmEnheter, vgsNameChain } from '../../lib/fint-organization-fixed/idm.js'
-import { validateRawOrganizationUnits } from '../../lib/fint-organization-fixed/idm-validation.js'
+import { getExceptionRules } from '../../src/lib/fint-organization-fixed/exception-rules.js'
+import { repackFintIdmEnheter, vgsNameChain } from '../../src/lib/fint-organization-fixed/idm.js'
+import { validateRawOrganizationUnits } from '../../src/lib/fint-organization-fixed/idm-validation.js'
 import { createTestOrgUnit, createAditroUnits, getValidExcepttionRules } from './test-org.js'
 
 const createTestOrg = () => {
