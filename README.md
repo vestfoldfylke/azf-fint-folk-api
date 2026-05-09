@@ -7,7 +7,6 @@ API for getting predifned data from FINT (easier usage - predefined graph-templa
 # Usage and endpoints
 
 ## Optional query params
-- *?includeRaw=true* Defaults to false. Can be used on **all endpoints** (if you want to include the raw data from FINT in the response)
 - *?skipCache=true* Defaults to false/undefined. Can be used on **all endpoints**. If you want latest data and not from cache. Cache is maximum RESPONSE_CACHE_TTL seconds old (default 1 hour)
 - *?includeInactiveEmployees=true* Defaults to false. Can be used on **/organization/{identifikator}/{identifikatorverdi}** (if you want to include inactive "arbeidsforhold" in the response)
 - *?includeInactiveUnits=true* Defaults to false. Can be used on **/organization/flat** and **/organization/structure** (if you want to include inactive "organisasjonselement" in the response)
