@@ -236,6 +236,7 @@ describe("vgsNameChain", () => {
     const nameChain = ["Tull vgs", "Tull videregående skole", "Tull videregåande skule"]
     assert.strictEqual(vgsNameChain(nameChain), true)
   })
+
   it("Returns false when not all starts with same school name", () => {
     const nameChain = ["Felles VGS", "Tull videregående skole", "Tull videregående skole"]
     const nameChain2 = ["Felles VGS", "Tull videregående skole", "felles vgs"]
@@ -244,6 +245,7 @@ describe("vgsNameChain", () => {
     assert.strictEqual(vgsNameChain(nameChain2), false)
     assert.strictEqual(vgsNameChain(nameChain3), false)
   })
+
   it("Returns false when not all ends with correct suffx", () => {
     const nameChain = ["Tull vgs", "Tull videregående skole", "Tull"]
     const nameChain2 = ["Tull vgs", "Tull videregående skoler"]
@@ -252,6 +254,7 @@ describe("vgsNameChain", () => {
     assert.strictEqual(vgsNameChain(nameChain2), false)
     assert.strictEqual(vgsNameChain(nameChain3), false)
   })
+
   it("Returns true when there are only uppercase differences", () => {
     const nameChain = ["TULL VGS", "tULL VIdEREGÅENDE SKOLE", "TULL VIDEReGÅANDE SKULE"]
     const nameChain2 = ["tull videregående skole", "Tull vgs", "tULL VIDEREGÅaNDE SKuLE"]
@@ -268,6 +271,7 @@ describe("createTestOrg", () => {
     assert.ok(aditroUnits !== undefined)
     assert.ok(aditroUnits.size > 0)
   })
+
   it("Is valid raw organizations", () => {
     const { units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -281,6 +285,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
     assert.throws(() => repackFintIdmEnheter(units))
     assert.throws(() => repackFintIdmEnheter([], [], undefined))
   })
+
   it("test org is repacked, but has validation errors when no exceptions are defined", () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -336,6 +341,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
 
     assert.strictEqual(repackResult.valid, false)
   })
+
   it("We add exception rule for useAbstractAsUnit", () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -359,6 +365,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
 
     assert.strictEqual(repackResult.valid, false)
   })
+
   it("We add exception rule for nameChainOverride", () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -383,6 +390,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
 
     assert.strictEqual(repackResult.valid, false)
   })
+
   it("We add needed exception rules and get valid result", () => {
     const { aditroUnits, units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -420,6 +428,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
 
     assert.strictEqual(repackResult.valid, true)
   })
+
   it("We add extra exception rules and get valid result", () => {
     const { units, aditroUnits } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)
@@ -506,6 +515,7 @@ describe("repackFintIdmEnheter works as expected when", () => {
 
     assert.strictEqual(repackResult.valid, true)
   })
+
   it("We mess with aditro units and get invalid result", () => {
     const { aditroUnits, units } = createTestOrg()
     const validationResult = validateRawOrganizationUnits(units)

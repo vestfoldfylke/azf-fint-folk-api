@@ -10,6 +10,7 @@ describe("aktivPeriode is aktiv when", () => {
     }
     assert.strictEqual(aktivPeriode(periode), true)
   })
+
   it("Sluttdato is false", () => {
     const periode = {
       start: "2019-08-01T00:00:00Z",
@@ -17,6 +18,7 @@ describe("aktivPeriode is aktiv when", () => {
     }
     assert.strictEqual(aktivPeriode(periode), true)
   })
+
   it("Sluttdato is invalid date", () => {
     const periode = {
       start: "2019-08-01T00:00:00Z",
@@ -24,6 +26,7 @@ describe("aktivPeriode is aktiv when", () => {
     }
     assert.strictEqual(aktivPeriode(periode), true)
   })
+
   it("Sluttdato is not reached", () => {
     const now = new Date()
     const tomorrow = new Date(now)
@@ -47,6 +50,7 @@ describe("aktivPeriode is NOT aktiv when", () => {
     }
     assert.strictEqual(aktivPeriode(periode), false)
   })
+
   it("Startdato is not reached yet", () => {
     const now = new Date()
     const tomorrow = new Date(now)
@@ -57,6 +61,7 @@ describe("aktivPeriode is NOT aktiv when", () => {
     }
     assert.strictEqual(aktivPeriode(periode), false)
   })
+
   it("Startdato is invalid date", () => {
     const periode = {
       start: "tubasolo",
@@ -86,6 +91,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: true
     })
   })
+
   it("Regular FINT periode has values and is not aktiv", () => {
     const periode = {
       beskrivelse: "Test periode",
@@ -102,6 +108,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: false
     })
   })
+
   it("Regular FINT periode has values and has funny case where start is today but timstamp not reached yet - should be aktiv", () => {
     const inTenMinutes = new Date(today.getTime() + 10 * 60 * 1000).toISOString()
     const periode = {
@@ -119,6 +126,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: true
     })
   })
+
   it("Regular FINT periode has values and has funny case where end is today and timstamp is reached - should be aktiv", () => {
     const tenMinutesAgo = new Date(today.getTime() - 10 * 60 * 1000).toISOString()
     const periode = {
@@ -136,6 +144,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: true
     })
   })
+
   it("No periode... should be aktiv and null values", () => {
     const repacked = repackPeriode(null)
     assert.deepStrictEqual(repacked, {
@@ -147,6 +156,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: true
     })
   })
+
   it("Slutt is null, start is in the past - should be aktiv", () => {
     const periode = {
       beskrivelse: "Test periode",
@@ -163,6 +173,7 @@ describe("repackPeriode works as expected", () => {
       aktiv: true
     })
   })
+
   it("Start is null, should not be aktiv", () => {
     const periode = {
       beskrivelse: "Test periode",
@@ -192,6 +203,7 @@ describe("repackLeder work as excpected when", () => {
       kontaktEpostadresse: null
     })
   })
+
   it("there is a leder with some props missing", () => {
     const leder = {
       ansattnummer: {
@@ -213,6 +225,7 @@ describe("repackLeder work as excpected when", () => {
       kontaktEpostadresse: null
     })
   })
+
   it("there is a leder with all props", () => {
     const leder = {
       ansattnummer: {

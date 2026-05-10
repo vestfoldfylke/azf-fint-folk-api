@@ -6,6 +6,7 @@ import { fintGraph } from "./requests/call-fint.js"
 
 const repackOrganizationFlat = (inputUnit, flat, level, graphQlFlatUnits) => {
   let unit
+  
   if (!graphQlFlatUnits) {
     unit = JSON.parse(JSON.stringify(inputUnit))
   } else {
@@ -28,6 +29,7 @@ const repackOrganizationFlat = (inputUnit, flat, level, graphQlFlatUnits) => {
 
   const gyldighetsperiode = repackPeriode(unit.gyldighetsperiode)
   const overordnetGyldighetsperiode = repackPeriode(unit.overordnet.gyldighetsperiode)
+  
   const overordnet = {
     aktiv: overordnetGyldighetsperiode?.aktiv || false,
     organisasjonsId: unit.overordnet.organisasjonsId.identifikatorverdi,
@@ -54,6 +56,7 @@ const repackOrganizationFlat = (inputUnit, flat, level, graphQlFlatUnits) => {
     return repackOrganizationFlat(u, flat, level + 1, graphQlFlatUnits) // Recursion
   })
   delete unit.underordnet // Don't need this anymore, we have the correct underordnet in the flat array
+
   flat.push(unit)
   return unit
 }

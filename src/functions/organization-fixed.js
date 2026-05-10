@@ -23,6 +23,7 @@ const getOrganizationFixed = async (request) => {
 
     if (identifikatorverdi === "validate") {
       logger.info("Only validation requested, returning validation")
+
       if (rawValidationResult) {
         delete rawValidationResult.validUnits
       }
@@ -32,11 +33,13 @@ const getOrganizationFixed = async (request) => {
       if (repackedFintUnitsResult) {
         delete repackedFintUnitsResult.resultingUnitsNested
       }
+
       return { rawValidationResult, exceptionRuleValidationResult: exceptionRuleValidationResult || "not run", repackedFintUnitsResult: repackedFintUnitsResult || "not run" }
     }
 
     if (!(rawValidationResult?.valid && exceptionRuleValidationResult?.valid && repackedFintUnitsResult?.valid)) {
       logger.warn("Validation failed, returning 500 and error")
+
       if (rawValidationResult) {
         delete rawValidationResult.validUnits
       }
@@ -46,6 +49,7 @@ const getOrganizationFixed = async (request) => {
       if (repackedFintUnitsResult) {
         delete repackedFintUnitsResult.resultingUnitsNested
       }
+
       throw new HttpError(500, "Validation failed - check errordata, or call OrganizationFixed/idm/validate")
     }
 

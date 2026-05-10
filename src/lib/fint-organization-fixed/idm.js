@@ -340,6 +340,7 @@ const repackFintIdmEnheter = (topUnits, validatedUnits, aditroUnits, exceptionRu
     }
     // Check if there are units we havent handled with recursive function
     validation.tests.notHandledUnits.data = validatedUnits.filter((unit) => !handledUnits.some((handledUnit) => handledUnit.organisasjonsId === unit.organisasjonsId.identifikatorverdi))
+
     // Check if any exception rules were not triggered
     for (const ruleType in exceptionRules) {
       for (const ruleUnit in exceptionRules[ruleType]) {

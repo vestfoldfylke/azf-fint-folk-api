@@ -7,6 +7,7 @@ const repackStudent = (elevforhold) => {
   if (elevforhold.elevforhold) {
     elevforhold = elevforhold.elevforhold // I gruppemedlemskap ligger elevforholdet inne i en prop som heter elevforhold...
   }
+
   const name = repackNavn(elevforhold.elev.person.navn)
   const repackedStudent = {
     navn: name.fulltnavn,
@@ -17,9 +18,11 @@ const repackStudent = (elevforhold) => {
     elevforholdId: elevforhold.systemId.identifikatorverdi,
     hovedskole: elevforhold.hovedskole === true || false
   }
+
   if (elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi) {
     repackedStudent.fodselsnummer = elevforhold.elev?.person?.fodselsnummer?.identifikatorverdi
   }
+
   return repackedStudent
 }
 
@@ -51,6 +54,7 @@ const repackSchool = (fintSchool) => {
     elever: fintSchool.skole.elevforhold.map((elev) => repackStudent(elev)),
     basisgrupper: []
   }
+
   for (const gruppe of fintSchool.skole.basisgruppe) {
     const termin = repackTermin(gruppe.termin)
     const skolear = repackSkolear(gruppe.skolear)
@@ -79,7 +83,9 @@ const repackSchool = (fintSchool) => {
   if (!fintSchool.skole.undervisningsgruppe) {
     return school
   }
+
   school.undervisningsgrupper = []
+
   for (const gruppe of fintSchool.skole.undervisningsgruppe) {
     const termin = repackTermin(gruppe.termin)
     const skolear = repackSkolear(gruppe.skolear)
@@ -101,6 +107,7 @@ const repackSchool = (fintSchool) => {
         })
     })
   }
+
   return school
 }
 
@@ -108,11 +115,14 @@ const fintSchool = async (schoolNumber, includeStudentSsn) => {
   logger.info("fintSchool - Creating graph payload {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
   const payload = graphQlSchool(schoolNumber, includeStudentSsn)
   logger.info("fintSchool - Created graph payload, sending request to FINT {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
+  
   const { data } = await fintGraph(payload)
+  
   if (!data.skole?.navn) {
     logger.info(`fintSchool - No school with schoolNumber "${schoolNumber}" found in FINT`)
     return null
   }
+
   logger.info("Got response from FINT, repacking result {schoolNumber}", schoolNumber)
   const repacked = repackSchool(data)
   logger.info("fintSchool - Repacked result - returning {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)

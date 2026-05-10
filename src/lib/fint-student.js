@@ -8,7 +8,9 @@ const repackTeacher = (undervisningsforhold, contactTeachers) => {
   if (undervisningsforhold.undervisningsforhold) {
     undervisningsforhold = undervisningsforhold.undervisningsforhold // I gruppemedlemskap ligger undervisningsforholdet inne i en prop som heter undervisningsforhold...
   }
+
   const name = repackNavn(undervisningsforhold.skoleressurs?.personalressurs?.person?.navn)
+
   return {
     feidenavn: undervisningsforhold.skoleressurs?.feidenavn?.identifikatorverdi || null,
     ansattnummer: undervisningsforhold.skoleressurs?.personalressurs?.ansattnummer?.identifikatorverdi || null,
@@ -24,8 +26,10 @@ const repackStudent = (fintStudent) => {
   if (fintStudent.person) {
     fintStudent = fintStudent.person // Searched by fnr, simply go a step in to use the same functionality as for feidenavn
   }
+
   const name = repackNavn(fintStudent.elev.person.navn)
   const hovedskoleElevforhold = fintStudent.elev.elevforhold.find((f) => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
+  
   const student = {
     feidenavn: fintStudent.elev.feidenavn?.identifikatorverdi || null,
     elevnummer: fintStudent.elev.elevnummer.identifikatorverdi,
@@ -55,6 +59,7 @@ const repackStudent = (fintStudent) => {
     kontaktlarere: [],
     elevforhold: []
   }
+
   for (const forhold of fintStudent.elev.elevforhold) {
     const elevforhold = {
       systemId: forhold.systemId.identifikatorverdi,
@@ -89,6 +94,7 @@ const repackStudent = (fintStudent) => {
 
     // Kontaktlærergrupper
     const contactTeachers = [] // Enklere håndtering for å sjekke om noen er kontaklærer i et elevforhold, fyller opp feidenavn på kontaktlærer når det itereres over hvert elevforhold
+    
     for (const medlemskap of forhold.kontaktlarergruppemedlemskap) {
       const medlemskapgyldighetsperiode = repackPeriode(medlemskap.gyldighetsperiode)
       const gruppe = medlemskap.kontaktlarergruppe // Selve kontaktlarergruppen ligger inne i objektet for medlemskapet
@@ -167,6 +173,7 @@ const repackStudent = (fintStudent) => {
         undervisningsforhold: gruppe.undervisningsforhold.map((larer) => repackTeacher(larer, contactTeachers))
       })
     }
+
     student.elevforhold.push(elevforhold)
   }
   return student
@@ -176,14 +183,18 @@ const fintStudent = async (feidenavn, elevnummer) => {
   logger.info("fintStudent - Creating graph payload {feidenavn}", feidenavn)
   const payload = graphQlStudent(feidenavn, elevnummer)
   logger.info("fintStudent - Created graph payload, sending request to FINT {feidenavn}", feidenavn)
+  
   const { data } = await fintGraph(payload)
+  
   if (!data.elev?.person?.navn?.fornavn) {
     logger.info(`fintStudent - No student with feidenavn "${feidenavn}" found in FINT`)
     return null
   }
+
   logger.info("fintStudent - Got response from FINT, repacking result {feidenavn}", feidenavn)
   const repacked = repackStudent(data)
   logger.info("fintStudent - Repacked result - fetching AzureAd info {feidenavn}", feidenavn)
+  
   if (feidenavn) {
     try {
       const aad = await getStudentFromFeidenavn(feidenavn)
@@ -198,6 +209,7 @@ const fintStudent = async (feidenavn, elevnummer) => {
       logger.error("fintStudent - Failed when getting user from AzureAd. Cannot populate entra values", error.toString())
     }
   }
+  
   if (!repacked.upn) {
     repacked.upn = null // If no upn was found, set it to null
   }

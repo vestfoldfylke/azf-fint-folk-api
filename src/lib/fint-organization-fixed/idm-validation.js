@@ -194,6 +194,7 @@ const validateRawOrganizationUnits = (rawOrganizationUnits) => {
       return false
     })
     validationResult.tests.expiredUnits.status = validationResult.tests.expiredUnits.data.length === 0 ? "pass" : "warn"
+
     // Filtrerer vekk utgåtte enheter
     enheter = enheter.filter((enhet) => !validationResult.tests.expiredUnits.data.some((unit) => unit.organisasjonsId.identifikatorverdi === enhet.organisasjonsId.identifikatorverdi))
 

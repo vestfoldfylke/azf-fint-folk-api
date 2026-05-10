@@ -90,6 +90,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.valid, true)
     assert.strictEqual(validationResult.validUnits.length, units.length)
   })
+
   it("When all NOT empty units are valid - returns valid and units", () => {
     const units = createSimpleOrg()
     units.push({})
@@ -98,6 +99,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.valid, true)
     assert.strictEqual(validationResult.validUnits.length, units.length - 2)
   })
+
   it("When some unit have not valid id format (x-x-x) - returns not valid and no units", () => {
     const units = createSimpleOrg()
     units[0].organisasjonsId.identifikatorverdi = "O-39006"
@@ -107,6 +109,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.invalidOrganisasjonsIdFormat.data.length, 1)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When some abstract unit have arbeidsforhold - returns not valid and no units", () => {
     const units = createSimpleOrg()
     const abstractUnit = units.find((unit) => Array.isArray(unit._links.underordnet) && unit._links.underordnet.length > 0)
@@ -121,6 +124,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.abstractWithArbeidsforhold.data.length, 1)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When some units have itself as a child - returns valid and removes the relation to itself as a child", () => {
     const units = createSimpleOrg()
     const unitToModify = units.find((unit) => unit.organisasjonsId.identifikatorverdi === "O-39006-1")
@@ -137,6 +141,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     )
     assert.strictEqual(validationResult.validUnits.length, units.length)
   })
+
   it("When some units are missing overordnet - returns not valid and no units", () => {
     const units = createSimpleOrg()
     delete units[0]._links.overordnet
@@ -147,6 +152,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.missingOverordnet.data.length, 2)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When some units are missing self organisasjonsid link - returns not valid and no units", () => {
     const units = createSimpleOrg()
     delete units[3]._links.self
@@ -157,6 +163,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.missingSelfOrgIdLink.data.length, 2)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When some units have broken child relation link - returns valid and units - AND returns the units with broken child relation in validation", () => {
     const units = createSimpleOrg()
     const brokenTopUnit = createTestOrgUnit({ id: "O-39006-YOYO", overordnetId: "O-39006-YOYO", underordnetIds: ["O-39006-finnesikke", "O-39006-Oisann"] })
@@ -169,6 +176,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.brokenChildRelation.data.length, 2)
     assert.strictEqual(validationResult.validUnits.length, units.length - 2)
   })
+
   it("When some units have broken parent relation link - returns not valid and no units", () => {
     const units = createSimpleOrg()
     units[2]._links.overordnet[0].href = `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/bullshit`
@@ -179,6 +187,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.brokenParentRelation.data.length, 2)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When no top units are present - returns not valid and no units", () => {
     const units = createSimpleOrg()
     units.shift()
@@ -190,6 +199,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.topUnits.data.length, 0)
     assert.strictEqual(validationResult.validUnits, null)
   })
+
   it("When a unit points to expired child - returns valid, but expired link and expired unit is removed", () => {
     const units = createSimpleOrg()
     const parentUnit = createTestOrgUnit({ id: "O-39006-PARENT", overordnetId: "O-39006-PARENT", underordnetIds: ["O-39006-EXPIRED", "O-39006-NOTEXPIRED"] })
@@ -209,6 +219,7 @@ describe("validateRawOrganizationUnits works as expected when", () => {
     assert.strictEqual(validationResult.tests.relationToExpiredChild.data.length, 1)
     assert.strictEqual(validationResult.validUnits.length, units.length - 1)
   })
+
   it("When a unit points to expired parent - returns not valid and no units", () => {
     const units = createSimpleOrg()
     const expiredParentUnit = createTestOrgUnit({
@@ -238,6 +249,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 0)
     assert.strictEqual(validationResult.valid, true)
   })
+
   it("All exceptions are set up correctly - returns valid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -290,6 +302,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 0)
     assert.strictEqual(validationResult.valid, true)
   })
+
   it("There exists a unknown rule name - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -347,6 +360,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 1)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exceptions have wrong id/key - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -399,6 +413,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 5)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exceptions does not have correct name (on base unit) - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -451,6 +466,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 5)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exceptions does not have correct name (on child unit) - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -497,6 +513,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 3)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exceptions with childs that dont exist - returns invalid", () => {
     const units = createSimpleOrg()
     const unitToTweak = units.find((unit) => unit.organisasjonsId.identifikatorverdi === "O-39006-1")
@@ -540,6 +557,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 3)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exception unit is not found by key - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
@@ -592,6 +610,7 @@ describe("validateExceptionsRules works as expected when", () => {
     assert.strictEqual(validationResult.invalidRules.length, 5)
     assert.strictEqual(validationResult.valid, false)
   })
+
   it("Exceptions are malformed - returns invalid", () => {
     const units = createSimpleOrg()
     const exceptionsRules = {
