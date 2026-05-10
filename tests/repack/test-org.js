@@ -24,6 +24,8 @@ const createTestOrgUnit = (unit) => {
     throw new Error('Missing required parameter "gyldighetsperiode.start"')
   }
 
+  const organisasjonsKode = id.split("-")[2]
+
   const testOrgUnit = {
     organisasjonsId: {
       identifikatorverdi: id
@@ -35,7 +37,7 @@ const createTestOrgUnit = (unit) => {
     navn: navn || `Unit med id ${id}`,
     kortnavn: kortnavn || null,
     organisasjonsKode: {
-      identifikatorverdi: id.split("-")[2]
+      identifikatorverdi: organisasjonsKode
     },
     _links: {
       overordnet: [
@@ -73,7 +75,7 @@ const createTestOrgUnit = (unit) => {
         href: `${url}/administrasjon/personal/arbeidsforhold/systemid/EM-39003-14027402-1-1~~20220812`
       }
     ]
-    testOrgUnit.kortnavn = testOrgUnit.kortnavn || `KORTNAVN-${id.split("-")[2]}`
+    testOrgUnit.kortnavn = testOrgUnit.kortnavn || `KORTNAVN-${organisasjonsKode}`
   }
   return testOrgUnit
 }
