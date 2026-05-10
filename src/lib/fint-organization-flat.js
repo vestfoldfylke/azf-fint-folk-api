@@ -6,7 +6,7 @@ import { fintGraph } from "./requests/call-fint.js"
 
 const repackOrganizationFlat = (inputUnit, flat, level, graphQlFlatUnits) => {
   let unit
-  
+
   if (!graphQlFlatUnits) {
     unit = JSON.parse(JSON.stringify(inputUnit))
   } else {
@@ -29,7 +29,7 @@ const repackOrganizationFlat = (inputUnit, flat, level, graphQlFlatUnits) => {
 
   const gyldighetsperiode = repackPeriode(unit.gyldighetsperiode)
   const overordnetGyldighetsperiode = repackPeriode(unit.overordnet.gyldighetsperiode)
-  
+
   const overordnet = {
     aktiv: overordnetGyldighetsperiode?.aktiv || false,
     organisasjonsId: unit.overordnet.organisasjonsId.identifikatorverdi,

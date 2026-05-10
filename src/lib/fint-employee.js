@@ -105,7 +105,7 @@ const fintEmployee = async (ansattnummer) => {
 
   const repacked = repackEmployee(data, fixedOrgFlat, graphQlFlat)
   logger.info("fintEmployee - Repacked result - fetching EntraId info {ansattnummer}", ansattnummer)
-  
+
   const aad = await getUserFromAnsattnummer(ansattnummer)
 
   if (aad?.value && aad.value.length === 1) {
@@ -116,7 +116,7 @@ const fintEmployee = async (ansattnummer) => {
 
     return repacked
   }
-  
+
   logger.info("fintEmployee - Could not find user in EntraId {ansattnummer}", ansattnummer)
 
   return repacked

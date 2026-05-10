@@ -10,7 +10,7 @@ const repackStudent = (elevforhold, contactTeacherGroups) => {
   }
 
   const name = repackNavn(elevforhold.elev.person.navn)
-  
+
   const repackedStudent = {
     navn: name.fulltnavn,
     fornavn: name.fornavn,
@@ -30,7 +30,7 @@ const repackStudent = (elevforhold, contactTeacherGroups) => {
 const repackTeacher = (fintTeacher) => {
   const name = repackNavn(fintTeacher.skoleressurs.personalressurs.person.navn)
   const hovedskoleUndervisningsforhold = fintTeacher.skoleressurs.undervisningsforhold.find((f) => f.hovedskole) || null // Sjekk om det finnes et undervisningsforholld som er tilknyttet hovedskole
-  
+
   const teacher = {
     feidenavn: fintTeacher.skoleressurs.feidenavn.identifikatorverdi,
     ansattnummer: fintTeacher.skoleressurs.personalressurs?.ansattnummer.identifikatorverdi,
@@ -136,21 +136,21 @@ const fintTeacher = async (feidenavn, includeStudentSsn) => {
   logger.info("fintTeacher - Creating graph payload {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
   const payload = graphQlTeacher(feidenavn, includeStudentSsn)
   logger.info("fintTeacher - Created graph payload, sending request to FINT {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
-  
+
   const { data } = await fintGraph(payload)
-  
+
   if (!data.skoleressurs?.personalressurs?.person?.navn?.fornavn) {
     logger.info(`fintTeacher - No teacher with feidenavn "${feidenavn}" found in FINT`)
     return null
   }
-  
+
   logger.info("Got response from FINT, repacking result {feidenavn}", feidenavn)
   const repacked = repackTeacher(data)
   logger.info("fintTeacher - Repacked result - fetching AzureAd info {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
-  
+
   try {
     const aad = await getUserFromSamAccount(feidenavn.split("@")[0])
-    
+
     if (aad.value && aad.value.length === 1) {
       logger.info("fintTeacher - Found user in AzureAd {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)
       const { userPrincipalName, officeLocation } = aad.value[0]
@@ -158,7 +158,7 @@ const fintTeacher = async (feidenavn, includeStudentSsn) => {
       repacked.azureOfficeLocation = officeLocation || null
 
       return repacked
-    } 
+    }
   } catch (error) {
     if (error.response?.status === 404) {
       logger.info("fintTeacher - 404 - Could not find user in AzureAd {feidenavn} {includeStudentSsn}", feidenavn, includeStudentSsn)

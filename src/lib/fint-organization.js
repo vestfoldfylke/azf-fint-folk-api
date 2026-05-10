@@ -9,9 +9,9 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
   }
 
   const gyldighetsperiode = repackPeriode(fintOrganization.organisasjonselement.gyldighetsperiode)
-  
+
   let overordnet = null
-  
+
   if (fintOrganization.organisasjonselement.overordnet.organisasjonsId.identifikatorverdi !== fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi) {
     let overordnetData = null
     if (fixedOrgFlat && graphQlFlat) {
@@ -44,7 +44,7 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
       kortnavn: overordnetData.kortnavn
     }
   }
-  
+
   const unit = {
     aktiv: gyldighetsperiode?.aktiv || false,
     organisasjonsId: fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi,
@@ -78,7 +78,7 @@ const repackOrganization = (fintOrganization, fixedOrgFlat, graphQlFlat) => {
 
   // Underordnet
   let underordnetToHandle = []
-  
+
   if (fixedOrgFlat && graphQlFlat) {
     const correspondingFixedOrgUnit = fixedOrgFlat.find((unit) => unit.organisasjonsId.identifikatorverdi === fintOrganization.organisasjonselement.organisasjonsId.identifikatorverdi)
     if (!correspondingFixedOrgUnit) {
@@ -144,12 +144,12 @@ const fintOrganization = async (identifikator, identifikatorverdi) => {
   const payload = graphQlOrganization(identifikator, identifikatorverdi)
   logger.info("fintOrganization - Created graph payload, sending request to FINT {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
   const { data } = await fintGraph(payload)
-  
+
   if (!data.organisasjonselement?.organisasjonsId?.identifikatorverdi) {
     logger.info(`fintOrganization - No organization with ${identifikator} "${identifikatorverdi}" found in FINT`)
     return null
   }
-  
+
   logger.info("fintOrganization - Got response from FINT, repacking result {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)
   const repacked = repackOrganization(data)
   logger.info("fintOrganization - Repacked result {identifikator} {identifikatorverdi}", identifikator, identifikatorverdi)

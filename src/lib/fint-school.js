@@ -115,9 +115,9 @@ const fintSchool = async (schoolNumber, includeStudentSsn) => {
   logger.info("fintSchool - Creating graph payload {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
   const payload = graphQlSchool(schoolNumber, includeStudentSsn)
   logger.info("fintSchool - Created graph payload, sending request to FINT {schoolNumber} {includeStudentSsn}", schoolNumber, includeStudentSsn)
-  
+
   const { data } = await fintGraph(payload)
-  
+
   if (!data.skole?.navn) {
     logger.info(`fintSchool - No school with schoolNumber "${schoolNumber}" found in FINT`)
     return null
