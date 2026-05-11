@@ -1,0 +1,8 @@
+import "./functions/teacher.js"
+import "./functions/organization.js"
+import "./functions/organization-fixed.js"
+import "./functions/employee.js"
+import "./functions/student.js"
+import "./functions/person.js"
+import "./functions/IdmTeamsStatus.js"
+import "./functions/school.js"
