@@ -2,29 +2,21 @@
   "name": "azf-fint-folk-api",
   "version": "1.0.0",
   "description": "API for getting smoother data from FINT (easier usage)",
+  "type": "module",
+  "main": "src/functions/*.js",
   "scripts": {
     "start": "func start",
-    "test": "standard && jest",
-    "test-jest": "jest --verbose"
+    "test": "biome check && node --test tests/**/*.test.js",
+    "lint": "npx @biomejs/biome check",
+    "lint:fix": "npx @biomejs/biome check --write",
+    "lint:fix:unsafe": "npx @biomejs/biome check --write --unsafe"
   },
   "dependencies": {
-    "@azure/msal-node": "^1.18.4",
-    "@vtfk/logger": "^6.3.4",
-    "axios": "^1.12.2",
-    "file-system-cache": "^2.4.7",
-    "jsonwebtoken": "^9.0.2"
+    "@azure/functions": "^4.14.0",
+    "@azure/msal-node": "^5.2.0",
+    "@vestfoldfylke/loglady": "^1.5.3"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
-    "standard": "^17.1.2"
-  },
-  "standard": {
-    "ignore": [
-      "/fint-templates"
-    ],
-    "env": [
-      "jest"
-    ]
+    "@biomejs/biome": "2.4.14"
   }
 }

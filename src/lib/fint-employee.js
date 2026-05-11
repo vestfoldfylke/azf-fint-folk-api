@@ -1,0 +1,125 @@
+import { logger } from "@vestfoldfylke/loglady"
+import graphQlEmployee from "../fint-templates/employee.js"
+import { getFixedUnits } from "./fint-organization-fixed/cached-idm-units.js"
+import { createStruktur, getAge, getNarmesteLeder, repackAdresselinje, repackLeder, repackNavn, repackPeriode } from "./helpers/repack-fint.js"
+import { fintGraph } from "./requests/call-fint.js"
+import { getUserFromAnsattnummer } from "./requests/call-graph.js"
+
+const repackEmployee = (fintEmployee, fixedOrgFlat, graphQlFlat) => {
+  const name = repackNavn(fintEmployee.personalressurs.person.navn)
+  const employee = {
+    ansattnummer: fintEmployee.personalressurs.ansattnummer.identifikatorverdi,
+    upn: null, // Hentes fra azure
+    aktiv: null,
+    navn: name.fulltnavn,
+    fornavn: name.fornavn,
+    etternavn: name.etternavn,
+    fodselsnummer: fintEmployee.personalressurs.person.fodselsnummer?.identifikatorverdi || null,
+    fodselsdato: fintEmployee.personalressurs.person.fodselsdato || null,
+    alder: getAge(fintEmployee.personalressurs.person.fodselsdato),
+    kjonn: fintEmployee.personalressurs.person.kjonn?.kode || null,
+    privatEpostadresse: fintEmployee.personalressurs.person.kontaktinformasjon?.epostadresse || null,
+    privatMobiltelefonnummer: fintEmployee.personalressurs.person.kontaktinformasjon?.mobiltelefonnummer || null,
+    brukernavn: fintEmployee.personalressurs.brukernavn?.identifikatorverdi || null,
+    kontaktEpostadresse: fintEmployee.personalressurs.kontaktinformasjon?.epostadresse || null,
+    kontaktMobiltelefonnummer: fintEmployee.personalressurs.kontaktinformasjon?.mobiltelefonnummer || null,
+    bostedsadresse: {
+      adresselinje: repackAdresselinje(fintEmployee.personalressurs.person.bostedsadresse?.adresselinje),
+      postnummer: fintEmployee.personalressurs.person.bostedsadresse?.postnummer || null,
+      poststed: fintEmployee.personalressurs.person.bostedsadresse?.poststed || null
+    },
+    entraIdOfficeLocation: null,
+    ansiennitet: fintEmployee.personalressurs.ansiennitet || null,
+    ansettelsesperiode: repackPeriode(fintEmployee.personalressurs.ansettelsesperiode),
+    personalressurskategori: {
+      kode: fintEmployee.personalressurs.personalressurskategori?.kode || null,
+      navn: fintEmployee.personalressurs.personalressurskategori?.navn || null
+    },
+    arbeidsforhold: [],
+    fullmakter: []
+  }
+
+  // Arbeidsforhold
+  for (const forhold of fintEmployee.personalressurs.arbeidsforhold) {
+    const gyldighetsperiode = repackPeriode(forhold.gyldighetsperiode)
+    const arbeidsforholdsperiode = repackPeriode(forhold.arbeidsforholdsperiode)
+    const aktiv = gyldighetsperiode?.aktiv && arbeidsforholdsperiode?.aktiv
+    const strukturlinje = createStruktur(forhold.arbeidssted, fixedOrgFlat, graphQlFlat)
+    if (aktiv && strukturlinje.length === 0) {
+      throw new Error(
+        `Could not create strukturlinje for ansattnummer "${employee.ansattnummer}" and arbeidssted "${forhold.arbeidssted.organisasjonsId.identifikatorverdi}" - missing ${forhold.arbeidssted.organisasjonsId.identifikatorverdi} in fixedOrgFlat or graphQlFlat. Check if arbeidsted UTGÅR`
+      )
+    }
+    employee.arbeidsforhold.push({
+      aktiv,
+      systemId: forhold.systemId.identifikatorverdi,
+      gyldighetsperiode,
+      arbeidsforholdsperiode,
+      hovedstilling: forhold.hovedstilling,
+      ansettelsesprosent: forhold.ansettelsesprosent,
+      lonnsprosent: forhold.lonnsprosent,
+      stillingsnummer: forhold.stillingsnummer,
+      stillingstittel: forhold.stillingstittel,
+      stillingskode: forhold.stillingskode,
+      arbeidsforholdstype: forhold.arbeidsforholdstype,
+      ansvar: forhold.ansvar,
+      funksjon: forhold.funksjon,
+      narmesteLeder: getNarmesteLeder(fintEmployee.personalressurs.ansattnummer.identifikatorverdi, strukturlinje) || {
+        navn: null,
+        kontaktEpostadresse: null,
+        ansattnummer: null
+      },
+      arbeidssted: {
+        organisasjonsId: forhold.arbeidssted.organisasjonsId.identifikatorverdi,
+        kortnavn: forhold.arbeidssted.kortnavn,
+        navn: forhold.arbeidssted.navn,
+        organisasjonsKode: forhold.arbeidssted.organisasjonsKode.identifikatorverdi,
+        leder: repackLeder(forhold.arbeidssted.leder)
+      },
+      strukturlinje
+    })
+  }
+
+  employee.aktiv = employee.ansettelsesperiode.aktiv && employee.arbeidsforhold.some((forhold) => forhold.aktiv)
+  return employee
+}
+
+/**
+ *
+ * @param {string} ansattnummer
+ * @returns {Promise<{[key: string]: any} | null>}
+ */
+const fintEmployee = async (ansattnummer) => {
+  logger.info("fintEmployee - Creating graph payload {ansattnummer}", ansattnummer)
+  const payload = graphQlEmployee(ansattnummer)
+  logger.info("fintEmployee - Created graph payload, sending request to FINT {ansattnummer}", ansattnummer)
+  const { data } = await fintGraph(payload)
+  if (!data.personalressurs?.person?.navn?.fornavn) {
+    logger.info(`fintEmployee - No employee with ansattnummer "${ansattnummer}" found in FINT`)
+    return null
+  }
+  logger.info("fintEmployee - Got response from FINT, repacking result {ansattnummer}", ansattnummer)
+
+  // Så må vi hente idm-cached-units, og sende med den til repackEmployee, for å kunne lage strukturlinja
+  const { fixedOrgFlat, graphQlFlat } = await getFixedUnits()
+
+  const repacked = repackEmployee(data, fixedOrgFlat, graphQlFlat)
+  logger.info("fintEmployee - Repacked result - fetching EntraId info {ansattnummer}", ansattnummer)
+
+  const aad = await getUserFromAnsattnummer(ansattnummer)
+
+  if (aad?.value && aad.value.length === 1) {
+    logger.info("fintEmployee - Found user in EntraId {ansattnummer}", ansattnummer)
+    const { userPrincipalName, officeLocation } = aad.value[0]
+    repacked.upn = userPrincipalName || null
+    repacked.entraIdOfficeLocation = officeLocation || null
+
+    return repacked
+  }
+
+  logger.info("fintEmployee - Could not find user in EntraId {ansattnummer}", ansattnummer)
+
+  return repacked
+}
+
+export { fintEmployee, repackEmployee }
