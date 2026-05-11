@@ -1,4 +1,4 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { logger } from "@vestfoldfylke/loglady"
 import { roles } from "../../config.js"
 import { fintEmployee } from "../lib/fint-employee.js"
@@ -8,10 +8,6 @@ import { getAnsattnummer } from "../lib/requests/call-graph.js"
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- *
- * @param {HttpRequest} request
- */
 const getEmployee = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["ansattnummer", "fodselsnummer", "upn"]
