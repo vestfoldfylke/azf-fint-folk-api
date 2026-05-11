@@ -1,13 +1,10 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { roles } from "../../config.js"
 import { fintPerson } from "../lib/fint-person.js"
 import { isFnr } from "../lib/helpers/identifikator-type.js"
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- * @param {HttpRequest} request
- */
 const getPerson = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["fodselsnummer"]

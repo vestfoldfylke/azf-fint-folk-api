@@ -1,4 +1,4 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { logger } from "@vestfoldfylke/loglady"
 import { roles, topUnitId } from "../../config.js"
 import { fixedOrganization } from "../lib/fint-organization-fixed/fixed-organization.js"
@@ -8,9 +8,6 @@ import { fintOrganizationFixedIdm } from "../lib/fint-organization-fixed/idm.js"
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- * @param {HttpRequest} request
- */
 const getOrganizationFixed = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["organisasjonsId", "organisasjonsKode", "structure", "flat", "idm"]

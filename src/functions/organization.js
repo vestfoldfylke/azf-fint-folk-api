@@ -1,4 +1,4 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { roles, topUnitId } from "../../config.js"
 import { fintOrganization } from "../lib/fint-organization.js"
 import { fintOrganizationFlat } from "../lib/fint-organization-flat.js"
@@ -6,9 +6,6 @@ import { fintOrganizationStructure } from "../lib/fint-organization-structure.js
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- * @param {HttpRequest} request
- */
 const getOrganization = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["organisasjonsId", "organisasjonsKode", "structure", "flat"]

@@ -1,19 +1,9 @@
-import { HttpRequest, InvocationContext } from "@azure/functions"
 import { logger } from "@vestfoldfylke/loglady"
 import { decodeAccessToken } from "../lib/helpers/decode-access-token.js"
 import { getResponse, setResponse } from "../lib/response-cache.js"
 import { runInContext, updateContext } from "./context-logger.js"
 import { HttpError } from "./http-error.js"
 
-/**
- *
- * @param {HttpRequest} request
- * @param {InvocationContext} context
- * @param {string[]} authorizedRoles - Array of roles that are authorized to access the endpoint. If the decoded token does not contain any of these roles, a 403 response will be returned.
- * @param {(request: HttpRequest) => Promise<unknown>} handler
- *
- * @returns {Promise<import("@azure/functions").HttpResponseInit>} Returns the response from the handler, or an error response if the token is invalid, missing required roles, or if the handler throws an error.
- */
 export const httpTriggerMiddleware = async (request, context, authorizedRoles, handler) => {
   const logContext = {
     prefix: `InvocationId: ${context.invocationId} - [${request.method}] ${context.functionName}`

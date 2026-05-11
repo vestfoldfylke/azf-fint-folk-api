@@ -1,4 +1,4 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { logger } from "@vestfoldfylke/loglady"
 import { roles } from "../../config.js"
 import { fintTeacher } from "../lib/fint-teacher.js"
@@ -8,9 +8,6 @@ import { getFeidenavn, getFeidenavnFromAnsattnummer } from "../lib/requests/call
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- * @param {HttpRequest} request
- */
 const getTeacher = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["feidenavn", "upn", "fodselsnummer"]

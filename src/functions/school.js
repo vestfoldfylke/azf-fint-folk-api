@@ -1,12 +1,9 @@
-import { app, HttpRequest } from "@azure/functions"
+import { app } from "@azure/functions"
 import { roles } from "../../config.js"
 import { fintSchool } from "../lib/fint-school.js"
 import { HttpError } from "../middleware/http-error.js"
 import { httpTriggerMiddleware } from "../middleware/http-trigger.js"
 
-/**
- * @param {HttpRequest} request
- */
 const getSchool = async (request) => {
   const { identifikator, identifikatorverdi } = request.params
   const validIdentifiers = ["skolenummer"]
