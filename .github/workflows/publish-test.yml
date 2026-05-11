@@ -1,0 +1,16 @@
+name: Build and deploy Node.js project to Azure Web App - DEMO
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    uses: vestfoldfylke/shared/.github/workflows/deploy-az-app-service-node.yml@main
+    with:
+      azure_appname: 'vfkdlzfellesapifintfolk'
+      azure_functionapp_package_path: '.'
+    secrets:
+      azure_publishprofile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DEV }}
