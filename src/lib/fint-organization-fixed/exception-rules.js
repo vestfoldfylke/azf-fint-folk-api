@@ -13,10 +13,10 @@ const vfkExceptionRules = {
       }
     },
     "O-39003-43": {
-      navn: "Voksenopplæring og karriereutvikling",
+      navn: "Voksenopplæring og integrering",
       nextLink: {
         href: `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/O-39003-439`,
-        navn: "Voksenopplæring og karriereutvikling"
+        navn: "Voksenopplæring og integrering"
       }
     },
     "O-39003-35": {
