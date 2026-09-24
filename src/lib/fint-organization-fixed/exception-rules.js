@@ -25,6 +25,13 @@ const vfkExceptionRules = {
         href: `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/O-39003-335`,
         navn: "Hovedtillitsvalgte"
       }
+    },
+    "O-39003-499": {
+      navn: "Pedagogisk-psykologisk tjeneste",
+      nextLink: {
+        href: `${url}/administrasjon/organisasjon/organisasjonselement/organisasjonsid/O-39003-40020`,
+        navn: "Pedagogisk-psykologisk tjeneste"
+      }
     }
   },
   // Sier spesifikt hvilke enheter som IKKE skal gå videre for å finne noen tilsvarende enhet på bunnivå - vær nu litt forsiktig med disse. Disse kommer altså til å KUN være abstrakte. Det bør ikke være mange av disse altså, da må vi snakke med HR...
